@@ -1,60 +1,18 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import BookingDialog from "@/app/booking/page";
-import { apiFetch } from "@/lib/api";
+import Header from "@/components/Header";
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar,
-  MapPin,
-  Star,
   Search,
-  Users,
-  Clock,
-  Tag,
-  User,
-  UserCircle,
-  Heart,
-  FileText,
-  LogOut,
-  Mail,
-  Phone,
-  Building,
-  CreditCard,
-  Shield,
+  Star,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 
 export default function App() {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -63,130 +21,8 @@ export default function App() {
   const [activePromoSlide, setActivePromoSlide] = useState(0);
   const [activeServiceSlide, setActiveServiceSlide] = useState(0);
   const [eventCards, setEventCards] = useState([]);
-  const [showProfileDialog, setShowProfileDialog] = useState(false);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [profileFormData, setProfileFormData] = useState({});
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const { user, setUser, logout, loading } = useAuth();
+  
   const router = useRouter();
-
-  const [openBooking, setOpenBooking] = useState(false);
-
-  // Profile form handlers
-  const handleEditProfile = () => {
-    setProfileFormData({
-      full_name: user.profile?.full_name || '',
-      date_of_birth: user.profile?.date_of_birth ? new Date(user.profile.date_of_birth).toISOString().split('T')[0] : '',
-      gender: user.profile?.gender || '',
-      bio: user.profile?.bio || '',
-      company_name: user.profile?.company_name || '',
-      address: user.profile?.address || '',
-      tax_code: user.profile?.tax_code || '',
-      payment_info: user.profile?.payment_info || '',
-      image: user.profile?.image || '',
-    });
-    setAvatarPreview(user.profile?.image || null);
-    setAvatarFile(null);
-    setIsEditingProfile(true);
-  };
-
-  const handleFormChange = (field, value) => {
-    setProfileFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditingProfile(false);
-    setProfileFormData({});
-    setAvatarFile(null);
-    setAvatarPreview(null);
-  };
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    setIsSaving(true);
-    try {
-      let avatarUrl = profileFormData.image;
-
-      // Upload avatar if a new file is selected
-      if (avatarFile) {
-        setIsUploadingAvatar(true);
-        const formData = new FormData();
-        formData.append('file', avatarFile);
-
-        const uploadRes = await apiFetch('/api/upload/avatar', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const uploadData = await uploadRes.json();
-
-        if (!uploadRes.ok) {
-          toast.error(uploadData.error || 'Upload avatar thất bại');
-          setIsUploadingAvatar(false);
-          setIsSaving(false);
-          return;
-        }
-
-        avatarUrl = uploadData.url;
-        setIsUploadingAvatar(false);
-      }
-
-      // Update profile with avatar URL
-      const dataToSend = {
-        ...profileFormData,
-        image: avatarUrl,
-      };
-      
-      console.log('Sending profile data:', dataToSend);
-      
-      const res = await apiFetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || 'Cập nhật thất bại');
-        return;
-      }
-
-      toast.success('Cập nhật thông tin thành công!');
-      
-      // Refresh user data
-      const userRes = await apiFetch('/api/auth/me');
-      if (userRes.ok) {
-        const userData = await userRes.json();
-        setUser(userData.user);
-      }
-
-      setIsEditingProfile(false);
-      setProfileFormData({});
-      setAvatarFile(null);
-      setAvatarPreview(null);
-    } catch (error) {
-      console.error('Save profile error:', error);
-      toast.error('Có lỗi xảy ra, vui lòng thử lại');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   useEffect(() => {
     async function fetchDiscounts() {
@@ -423,453 +259,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-sky-600">Pladivo</div>
-
-          {/* Navbar */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <a
-              href="/"
-              className="text-gray-700 hover:text-sky-600 transition-colors"
-            >
-              Trang chủ
-            </a>
-            <a
-              href="/about"
-              className="text-gray-700 hover:text-sky-600 transition-colors"
-            >
-              Giới thiệu
-            </a>
-            <a
-              href="/guide"
-              className="text-gray-700 hover:text-sky-600 transition-colors"
-            >
-              Hướng dẫn
-            </a>
-            <a
-              href="/events"
-              className="text-gray-700 hover:text-sky-600 transition-colors"
-            >
-              Sự kiện
-            </a>
-            <a
-              href="/services"
-              className="text-gray-700 hover:text-sky-600 transition-colors"
-            >
-              dịch vụ
-            </a>
-          </nav>
-
-          {/* Auth buttons */}
-          <div className="flex items-center space-x-4">
-            {loading ? (
-              <p className="text-gray-500 text-sm">Loading...</p>
-            ) : user ? (
-              <>
-                {/* Nút mở Booking Dialog */}
-                <BookingDialog />
-                
-                {/* User Dropdown Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="flex items-center gap-2 text-sky-600 border-sky-600 hover:bg-sky-50"
-                    >
-                      <UserCircle className="h-4 w-4" />
-                      {user.username}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.username}</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => setShowProfileDialog(true)}
-                      className="flex items-center cursor-pointer"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Thông tin cá nhân</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a href="/wishlist" className="flex items-center cursor-pointer">
-                        <Heart className="mr-2 h-4 w-4" />
-                        <span>Wishlist</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a href="/bookings" className="flex items-center cursor-pointer">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        <span>Lịch sử đơn đặt</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a href="/contracts" className="flex items-center cursor-pointer">
-                        <FileText className="mr-2 h-4 w-4" />
-                        <span>Hợp đồng</span>
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={logout}
-                      className="text-red-600 focus:text-red-600 cursor-pointer"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Đăng xuất</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Profile Dialog */}
-                <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-                  <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle className="text-2xl font-bold text-sky-600">
-                        Thông tin cá nhân
-                      </DialogTitle>
-                      <DialogDescription>
-                        {isEditingProfile ? 'Cập nhật thông tin cá nhân của bạn' : 'Xem thông tin chi tiết về tài khoản của bạn'}
-                      </DialogDescription>
-                    </DialogHeader>
-
-                    {!isEditingProfile ? (
-                      // View Mode
-                      <>
-                        <div className="space-y-6 py-4">
-                          {/* Avatar Display */}
-                          <div className="flex justify-center mb-4">
-                            {user.profile?.image ? (
-                              <img
-                                src={user.profile.image}
-                                alt="User avatar"
-                                className="w-32 h-32 rounded-full object-cover border-4 border-sky-600 shadow-lg"
-                              />
-                            ) : (
-                              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-lg">
-                                <UserCircle className="w-24 h-24 text-white" />
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Basic Information */}
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                              Thông tin cơ bản
-                            </h3>
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3">
-                                <UserCircle className="h-5 w-5 text-sky-600" />
-                                <div>
-                                  <p className="text-sm text-gray-500">Tên người dùng</p>
-                                  <p className="font-medium">{user.username}</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <Mail className="h-5 w-5 text-sky-600" />
-                                <div>
-                                  <p className="text-sm text-gray-500">Email</p>
-                                  <p className="font-medium">{user.email}</p>
-                                </div>
-                              </div>
-                              {user.phone && (
-                                <div className="flex items-center gap-3">
-                                  <Phone className="h-5 w-5 text-sky-600" />
-                                  <div>
-                                    <p className="text-sm text-gray-500">Số điện thoại</p>
-                                    <p className="font-medium">{user.phone}</p>
-                                  </div>
-                                </div>
-                              )}
-                              <div className="flex items-center gap-3">
-                                <Shield className="h-5 w-5 text-sky-600" />
-                                <div>
-                                  <p className="text-sm text-gray-500">Vai trò</p>
-                                  <p className="font-medium capitalize">{user.role}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Profile Information */}
-                          {user.profile ? (
-                            <div className="space-y-4">
-                              <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                                Thông tin hồ sơ
-                              </h3>
-                              <div className="space-y-3">
-                                {user.profile.full_name && (
-                                  <div className="flex items-center gap-3">
-                                    <User className="h-5 w-5 text-sky-600" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Họ và tên</p>
-                                      <p className="font-medium">{user.profile.full_name}</p>
-                                    </div>
-                                  </div>
-                                )}
-                                {user.profile.date_of_birth && (
-                                  <div className="flex items-center gap-3">
-                                    <Calendar className="h-5 w-5 text-sky-600" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Ngày sinh</p>
-                                      <p className="font-medium">{new Date(user.profile.date_of_birth).toLocaleDateString('vi-VN')}</p>
-                                    </div>
-                                  </div>
-                                )}
-                                {user.profile.gender && (
-                                  <div className="flex items-center gap-3">
-                                    <User className="h-5 w-5 text-sky-600" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Giới tính</p>
-                                      <p className="font-medium capitalize">
-                                        {user.profile.gender === 'male' ? 'Nam' : user.profile.gender === 'female' ? 'Nữ' : 'Khác'}
-                                      </p>
-                                    </div>
-                                  </div>
-                                )}
-                                {user.profile.bio && (
-                                  <div className="flex items-start gap-3">
-                                    <FileText className="h-5 w-5 text-sky-600 mt-1" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Giới thiệu</p>
-                                      <p className="font-medium">{user.profile.bio}</p>
-                                    </div>
-                                  </div>
-                                )}
-                                {user.profile.company_name && (
-                                  <div className="flex items-center gap-3">
-                                    <Building className="h-5 w-5 text-sky-600" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Công ty</p>
-                                      <p className="font-medium">{user.profile.company_name}</p>
-                                    </div>
-                                  </div>
-                                )}
-                                {user.profile.address && (
-                                  <div className="flex items-center gap-3">
-                                    <MapPin className="h-5 w-5 text-sky-600" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Địa chỉ</p>
-                                      <p className="font-medium">{user.profile.address}</p>
-                                    </div>
-                                  </div>
-                                )}
-                                {user.profile.tax_code && (
-                                  <div className="flex items-center gap-3">
-                                    <FileText className="h-5 w-5 text-sky-600" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Mã số thuế</p>
-                                      <p className="font-medium">{user.profile.tax_code}</p>
-                                    </div>
-                                  </div>
-                                )}
-                                {user.profile.payment_info && (
-                                  <div className="flex items-center gap-3">
-                                    <CreditCard className="h-5 w-5 text-sky-600" />
-                                    <div>
-                                      <p className="text-sm text-gray-500">Thông tin thanh toán</p>
-                                      <p className="font-medium">{user.profile.payment_info}</p>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-center py-6">
-                              <p className="text-gray-500">Chưa có thông tin hồ sơ</p>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            onClick={handleEditProfile}
-                            className="bg-sky-600 hover:bg-sky-700"
-                          >
-                            Cập nhật thông tin
-                          </Button>
-                          <Button
-                            onClick={() => setShowProfileDialog(false)}
-                            variant="outline"
-                          >
-                            Đóng
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      // Edit Mode
-                      <>
-                        <div className="space-y-4 py-4">
-                          {/* Avatar Upload Section */}
-                          <div className="space-y-2">
-                            <Label>Avatar</Label>
-                            <div className="flex items-center gap-4">
-                              <div className="relative">
-                                {avatarPreview ? (
-                                  <img
-                                    src={avatarPreview}
-                                    alt="Avatar preview"
-                                    className="w-24 h-24 rounded-full object-cover border-2 border-sky-600"
-                                  />
-                                ) : (
-                                  <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300">
-                                    <UserCircle className="w-16 h-16 text-gray-400" />
-                                  </div>
-                                )}
-                                {isUploadingAvatar && (
-                                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1">
-                                <Input
-                                  id="avatar"
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={handleAvatarChange}
-                                  className="cursor-pointer"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Chọn ảnh JPG, PNG hoặc GIF (tối đa 5MB)
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="full_name">Họ và tên</Label>
-                              <Input
-                                id="full_name"
-                                value={profileFormData.full_name}
-                                onChange={(e) => handleFormChange('full_name', e.target.value)}
-                                placeholder="Nhập họ và tên"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="date_of_birth">Ngày sinh</Label>
-                              <Input
-                                id="date_of_birth"
-                                type="date"
-                                value={profileFormData.date_of_birth}
-                                onChange={(e) => handleFormChange('date_of_birth', e.target.value)}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="gender">Giới tính</Label>
-                            <Select
-                              value={profileFormData.gender}
-                              onValueChange={(value) => handleFormChange('gender', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Chọn giới tính" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="male">Nam</SelectItem>
-                                <SelectItem value="female">Nữ</SelectItem>
-                                <SelectItem value="other">Khác</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="bio">Giới thiệu</Label>
-                            <Textarea
-                              id="bio"
-                              value={profileFormData.bio}
-                              onChange={(e) => handleFormChange('bio', e.target.value)}
-                              placeholder="Giới thiệu ngắn về bản thân"
-                              rows={3}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="company_name">Công ty</Label>
-                            <Input
-                              id="company_name"
-                              value={profileFormData.company_name}
-                              onChange={(e) => handleFormChange('company_name', e.target.value)}
-                              placeholder="Tên công ty"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="address">Địa chỉ</Label>
-                            <Input
-                              id="address"
-                              value={profileFormData.address}
-                              onChange={(e) => handleFormChange('address', e.target.value)}
-                              placeholder="Địa chỉ"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="tax_code">Mã số thuế</Label>
-                              <Input
-                                id="tax_code"
-                                value={profileFormData.tax_code}
-                                onChange={(e) => handleFormChange('tax_code', e.target.value)}
-                                placeholder="Mã số thuế"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="payment_info">Thông tin thanh toán</Label>
-                              <Input
-                                id="payment_info"
-                                value={profileFormData.payment_info}
-                                onChange={(e) => handleFormChange('payment_info', e.target.value)}
-                                placeholder="Số tài khoản, v.v."
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            onClick={handleSaveProfile}
-                            disabled={isSaving}
-                            className="bg-sky-600 hover:bg-sky-700"
-                          >
-                            {isSaving ? 'Đang lưu...' : 'Lưu'}
-                          </Button>
-                          <Button
-                            onClick={handleCancelEdit}
-                            variant="outline"
-                            disabled={isSaving}
-                          >
-                            Hủy
-                          </Button>
-                        </div>
-                      </>
-                    )}
-                  </DialogContent>
-                </Dialog>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="outline"
-                  className="text-sky-600 border-sky-600 hover:bg-sky-50"
-                >
-                  <a href="/login">Đăng nhập</a>
-                </Button>
-                <Button className="bg-sky-600 hover:bg-sky-700 text-white">
-                  <a href="/signup">Tạo tài khoản</a>
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header activePage="home" />
 
       <main>
         {/* Section 1: Split Layout */}
@@ -972,204 +362,174 @@ export default function App() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="relative">
-                    <div
-                      className="flex transition-transform duration-500 ease-in-out"
-                      style={{
-                        transform: `translateX(-${activeSlide * 100}%)`,
-                      }}
-                    >
-                      {discountedItems.map((item) => (
-                        <div key={item._id} className="min-w-full">
-                          <div className="relative">
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="w-full h-64 object-cover"
-                            />
-                            <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                              {item.discount}
-                            </div>
-                          </div>
-                          <div className="p-6">
-                            <h3 className="text-xl font-bold mb-2">
-                              {item.title}
-                            </h3>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <span className="text-gray-500 line-through text-sm">
-                                  {item.originalPrice}
-                                </span>
-                                <span className="text-2xl font-bold text-sky-600 ml-2">
-                                  {item.discountedPrice}
-                                </span>
-                              </div>
-                              <Button
-                                className="bg-sky-600 hover:bg-sky-700"
-                                onClick={() =>
-                                  router.push(`/booking?eventId=${item._id}`)
-                                }
-                              >
-                                Đặt ngay
-                              </Button>
-                            </div>
+                  <CardSlider
+                    items={promoServices}
+                    activeSlide={activePromoSlide}
+                    setActiveSlide={setActivePromoSlide}
+                    renderCard={(service) => (
+                      <div
+                        key={service.id}
+                        className="w-full flex-shrink-0 px-6 pb-6"
+                      >
+                        <div className="relative mb-4">
+                          <img
+                            src={service.image}
+                            alt={service.title}
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                          <div className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                            {service.discount}
                           </div>
                         </div>
-                      ))}
-                    </div>
-
-                    {discountedItems.length > 0 && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white"
-                          onClick={handlePrevSlide}
-                        >
-                          <ChevronLeft className="h-4 w-4" />
+                        <h3 className="font-bold text-xl mb-2">
+                          {service.title}
+                        </h3>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-500 line-through">
+                            {service.originalPrice}
+                          </span>
+                          <span className="text-xl font-bold text-red-600">
+                            {service.discountedPrice}
+                          </span>
+                        </div>
+                        <div className="flex items-center mb-4">
+                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="ml-1 text-sm">{service.rating}</span>
+                        </div>
+                        <Button className="w-full bg-sky-600 hover:bg-sky-700">
+                          Đặt Ngay
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white"
-                          onClick={handleNextSlide}
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </>
+                      </div>
                     )}
-                  </div>
+                  />
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
 
-        {/* Section 2: Book Now */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Đặt ngay
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Khám phá những sự kiện tuyệt vời diễn ra gần bạn và đặt vé ngay
-                lập tức
-              </p>
-            </div>
-
-            <CardSlider
-              items={eventCards}
-              activeSlide={activeEventSlide}
-              setActiveSlide={setActiveEventSlide}
-              renderCard={(event) => (
-                <Card
-                  key={event.id}
-                  className="w-72 flex-shrink-0 overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <div className="relative">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-4 left-4 bg-sky-600 text-white px-2 py-1 rounded text-sm">
-                      {event.price}
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-bold text-lg mb-2">{event.title}</h3>
-                    <div className="flex items-center text-gray-600 text-sm mb-2">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {event.date}
-                    </div>
-                    <div className="flex items-center text-gray-600 text-sm mb-3">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      {event.location}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 text-sm">{event.rating}</span>
-                      </div>
-                      <Button
-                        className="bg-sky-600 hover:bg-sky-700"
-                        onClick={() =>
-                          router.push(`/booking?eventId=${item._id}`)
-                        }
-                      >
-                        Đặt ngay
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            />
-          </div>
-        </section>
-
-        {/* Section 3: Promotions */}
+        {/* Section 2: Discounted Items (Carousel) */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Khuyến mãi hiện tại
+                Ưu đãi đặc biệt
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Ưu đãi có thời hạn cho các dịch vụ phổ biến nhất của chúng tôi
+                Khám phá các ưu đãi tốt nhất cho sự kiện của bạn
               </p>
             </div>
 
-            <CardSlider
-              items={promoServices}
-              activeSlide={activePromoSlide}
-              setActiveSlide={setActivePromoSlide}
-              renderCard={(service) => (
-                <Card
-                  key={service.id}
-                  className="w-72 flex-shrink-0 overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <div className="relative">
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold">
-                      {service.discount}
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-bold text-lg mb-2">{service.title}</h3>
-                    <div className="mb-3">
-                      <span className="text-gray-500 line-through text-sm">
-                        {service.originalPrice}
-                      </span>
-                      <span className="text-xl font-bold text-sky-600 ml-2">
-                        {service.discountedPrice}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 text-sm">{service.rating}</span>
+            {discountedItems.length > 0 ? (
+              <CardSlider
+                items={discountedItems}
+                activeSlide={activeSlide}
+                setActiveSlide={setActiveSlide}
+                renderCard={(item) => (
+                  <Card
+                    key={item._id}
+                    className="w-72 flex-shrink-0 overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative">
+                      <img
+                        src={item.image || "/default-discount.jpg"}
+                        alt={item.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                        -{item.percentage}%
                       </div>
-                      <Button
-                        size="sm"
-                        className="bg-sky-600 hover:bg-sky-700"
-                        onClick={() =>
-                          console.log(
-                            `API Call: POST /api/services/book - Service ID: ${service.id}`
-                          )
-                        }
-                      >
-                        Đặt dịch vụ
-                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-            />
+                    <CardContent className="p-4">
+                      <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {item.description}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">
+                          Hết hạn:{" "}
+                          {new Date(item.valid_until).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </span>
+                        <Button
+                          size="sm"
+                          className="bg-sky-600 hover:bg-sky-700"
+                        >
+                          Chi tiết
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              />
+            ) : (
+              <p className="text-center text-gray-500">
+                Không có ưu đãi nào hiện tại.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Section 3: Event Cards from API */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                Sự kiện sắp diễn ra
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Đừng bỏ lỡ những sự kiện hấp dẫn nhất
+              </p>
+            </div>
+
+            {eventCards.length > 0 ? (
+              <CardSlider
+                items={eventCards}
+                activeSlide={activeEventSlide}
+                setActiveSlide={setActiveEventSlide}
+                renderCard={(card) => (
+                  <Card
+                    key={card.id}
+                    className="w-72 flex-shrink-0 overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative">
+                      <img
+                        src={card.image}
+                        alt={card.title}
+                        className="w-full h-48 object-cover"
+                      />
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-bold text-lg mb-2">{card.title}</h3>
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <span className="mr-2">📅</span>
+                          {card.date}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <span className="mr-2">📍</span>
+                          {card.location}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-sky-600">
+                          {card.price}
+                        </span>
+                        <Button
+                          size="sm"
+                          className="bg-sky-600 hover:bg-sky-700"
+                        >
+                          Đặt vé
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              />
+            ) : (
+              <p className="text-center text-gray-500">Đang tải sự kiện...</p>
+            )}
           </div>
         </section>
 

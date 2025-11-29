@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,11 +33,15 @@ export default function BookingDialog() {
   const [userId, setUserId] = useState("");
   const [services, setServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
+  const [partners, setPartners] = useState([]);
 
   const [eventType, setEventType] = useState("");
   const [otherEventType, setOtherEventType] = useState("");
   const [ticketSales, setTicketSales] = useState(false);
   const [tickets, setTickets] = useState({});
+
+  const [allowAuditing, setAllowAuditing] = useState(false);
+  const [auditingAreas, setAuditingAreas] = useState({});
 
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState("");
@@ -44,11 +49,9 @@ export default function BookingDialog() {
   const [email, setEmail] = useState("");
   const [scale, setScale] = useState("");
   const [eventDate, setEventDate] = useState("");
-  const [eventTime, setEventTime] = useState("");
-  const [province, setProvince] = useState("");
-  const [district, setDistrict] = useState("");
-  const [ward, setWard] = useState("");
-  const [customLocation, setCustomLocation] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [partnerId, setPartnerId] = useState("");
   const [notes, setNotes] = useState("");
 
   const ticketTypes = [
@@ -64,17 +67,57 @@ export default function BookingDialog() {
     "Vé Press / Media / Sponsor",
   ];
 
+  const auditingAreaTypes = [
+    {
+      name: "Khu Media / Báo chí",
+      description: "Dành riêng cho phóng viên, truyền thông. Gần khu quay phim – camera",
+    },
+    {
+      name: "Khu Diễn giả / Speaker Area",
+      description: "Chỗ ngồi riêng cho các diễn giả. Thuận tiện lên sân khấu",
+    },
+    {
+      name: "Khu Khách mời danh dự",
+      description: "Khác VIP: thường dành riêng cho đại biểu cơ quan, tổ chức. Có bảng tên ghế",
+    },
+    {
+      name: "Khu Nhà tài trợ (Sponsors)",
+      description: "Dành cho đại diện các doanh nghiệp tài trợ. Thường nằm gần VIP",
+    },
+  ];
+
   useEffect(() => {
     setMounted(true);
     async function fetchData() {
       try {
-        const [serviceRes, meRes] = await Promise.all([
+        const [serviceRes, meRes, partnersRes] = await Promise.all([
           fetch("/api/services").then((r) => r.json()),
           fetch("/api/auth/me").then((r) => r.json()),
+          fetch("/api/partners").then((r) => r.json()),
         ]);
 
         if (serviceRes.success) setServices(serviceRes.data);
-        if (meRes.success) setUserId(meRes.data._id);
+        
+        // Filter partners to only show Nhà hàng and Khách sạn
+        if (partnersRes.success) {
+          const filteredPartners = partnersRes.data.filter(
+            (p) => p.partner_type.includes("Nhà hàng") || p.partner_type.includes("Khách sạn")
+          );
+          setPartners(filteredPartners);
+        }
+        
+        if (meRes.user) {
+          const user = meRes.user;
+          setUserId(user.user_id);
+          
+          // Auto-populate form fields from user data
+          if (user.profile) {
+            setCustomerName(user.profile.full_name || "");
+            setAddress(user.profile.address || "");
+          }
+          setEmail(user.email || "");
+          setPhone(user.phone || "");
+        }
       } catch (err) {
         console.error(err);
       }
@@ -118,6 +161,26 @@ export default function BookingDialog() {
     setTickets((prev) => ({ ...prev, [type]: Number(value) }));
   };
 
+  const handleAuditingAreaChange = (type, value) => {
+    setAuditingAreas((prev) => ({ ...prev, [type]: Number(value) }));
+  };
+
+  const resetForm = () => {
+    setEventType("");
+    setOtherEventType("");
+    setTicketSales(false);
+    setTickets({});
+    setAllowAuditing(false);
+    setAuditingAreas({});
+    setScale("");
+    setEventDate("");
+    setStartTime("");
+    setEndTime("");
+    setPartnerId("");
+    setNotes("");
+    setSelectedServices([]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -135,26 +198,44 @@ export default function BookingDialog() {
           services: selectedServices.map((s) => ({
             service_id: s.service_id,
           })),
-          booking_status: "confirmed",
+          booking_status: "pending",
           payment_status: "pending",
           notes,
           event_date: eventDate,
-          event_time: eventTime,
-          region: { province, district, ward },
-          custom_location: customLocation,
-          tickets: ticketSales ? tickets : [],
+          event_time: startTime,
+          event_end_time: endTime,
+          partner_id: partnerId || null,
+          ticket_sale: (eventType === "Sự kiện đại chúng" && ticketSales),
+          tickets: (eventType === "Sự kiện đại chúng" && ticketSales)
+            ? Object.entries(tickets)
+                .filter(([_, quantity]) => quantity > 0)
+                .map(([type, quantity]) => ({ type, quantity }))
+            : [],
+          allow_auditing: (eventType === "Hội nghị" && allowAuditing),
+          auditing_areas: (eventType === "Hội nghị" && allowAuditing)
+            ? Object.entries(auditingAreas)
+                .filter(([_, quantity]) => quantity > 0)
+                .map(([area_type, quantity]) => ({ area_type, quantity }))
+            : [],
         }),
       });
       const data = await res.json();
       if (res.ok) {
-        alert("Đặt booking thành công!");
+        toast.success("Đặt booking thành công!", {
+          description: "Booking của bạn đã được tạo và đang chờ xác nhận.",
+        });
         setOpen(false);
+        resetForm();
       } else {
-        alert(data.error || "Lỗi khi đặt booking");
+        toast.error("Lỗi khi đặt booking", {
+          description: data.error || "Vui lòng thử lại sau.",
+        });
       }
     } catch (err) {
       console.error(err);
-      alert("Có lỗi xảy ra");
+      toast.error("Có lỗi xảy ra", {
+        description: "Không thể kết nối đến server. Vui lòng thử lại.",
+      });
     }
   };
 
@@ -182,20 +263,53 @@ export default function BookingDialog() {
                 <SelectValue placeholder="Chọn loại sự kiện" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Tiệc cưới">Tiệc cưới</SelectItem>
                 <SelectItem value="Hội nghị">Hội nghị</SelectItem>
-                <SelectItem value="Sinh nhật">Sinh nhật</SelectItem>
                 <SelectItem value="Sự kiện công ty">Sự kiện công ty</SelectItem>
                 <SelectItem value="Sự kiện đại chúng">Sự kiện đại chúng</SelectItem>
-                <SelectItem value="Khác">Khác</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {eventType === "Khác" && (
+          {eventType === "Hội nghị" && (
             <div>
-              <Label>Nhập loại sự kiện</Label>
-              <Input value={otherEventType} onChange={(e) => setOtherEventType(e.target.value)} />
+              <Label className="flex items-center gap-2">
+                <Checkbox
+                  checked={allowAuditing}
+                  onCheckedChange={(checked) => setAllowAuditing(checked)}
+                />
+                <span>Có Cho phép đặt chỗ dự thính không?</span>
+              </Label>
+              {allowAuditing && (
+                <div className="mt-2 max-h-60 overflow-y-auto border rounded p-2 space-y-3">
+                  {auditingAreaTypes.map((area) => (
+                    <div key={area.name} className="flex flex-col gap-1 border-b pb-2 last:border-0">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={auditingAreas[area.name] > 0}
+                          onCheckedChange={(checked) => {
+                            if (!checked) handleAuditingAreaChange(area.name, 0);
+                            else handleAuditingAreaChange(area.name, 1);
+                          }}
+                        />
+                        <span className="font-medium">{area.name}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 ml-6">{area.description}</p>
+                      {auditingAreas[area.name] > 0 && (
+                        <div className="ml-6 flex items-center gap-2">
+                          <Label className="text-xs">Số lượng:</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={auditingAreas[area.name]}
+                            onChange={(e) => handleAuditingAreaChange(area.name, e.target.value)}
+                            className="w-20 h-8 text-sm"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -236,14 +350,38 @@ export default function BookingDialog() {
             </div>
           )}
 
-          {/* Customer Info */}
+          {/* Customer Info - Auto-filled and Read-only */}
           <div className="grid grid-cols-2 gap-2">
-            <Input placeholder="Tên khách hàng" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-            <Input placeholder="Địa chỉ" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <Input 
+              placeholder="Tên khách hàng" 
+              value={customerName} 
+              readOnly 
+              className="bg-gray-50 cursor-not-allowed"
+              title="Tự động điền từ hồ sơ người dùng"
+            />
+            <Input 
+              placeholder="Địa chỉ" 
+              value={address} 
+              readOnly 
+              className="bg-gray-50 cursor-not-allowed"
+              title="Tự động điền từ hồ sơ người dùng"
+            />
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input 
+              placeholder="Phone" 
+              value={phone} 
+              readOnly 
+              className="bg-gray-50 cursor-not-allowed"
+              title="Tự động điền từ hồ sơ người dùng"
+            />
+            <Input 
+              placeholder="Email" 
+              value={email} 
+              readOnly 
+              className="bg-gray-50 cursor-not-allowed"
+              title="Tự động điền từ hồ sơ người dùng"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -251,14 +389,32 @@ export default function BookingDialog() {
             <Input type="date" placeholder="Ngày sự kiện" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Input type="time" placeholder="Giờ sự kiện" value={eventTime} onChange={(e) => setEventTime(e.target.value)} />
-            <div className="grid grid-cols-3 gap-2">
-              <Input placeholder="Tỉnh/Thành" value={province} onChange={(e) => setProvince(e.target.value)} />
-              <Input placeholder="Quận/Huyện" value={district} onChange={(e) => setDistrict(e.target.value)} />
-              <Input placeholder="Phường/Xã" value={ward} onChange={(e) => setWard(e.target.value)} />
+            <div>
+              <Label className="text-sm text-gray-600">Giờ bắt đầu</Label>
+              <Input type="time" placeholder="Giờ bắt đầu" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+            </div>
+            <div>
+              <Label className="text-sm text-gray-600">Giờ kết thúc</Label>
+              <Input type="time" placeholder="Giờ kết thúc" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
             </div>
           </div>
-          <Input placeholder="Địa điểm tùy chỉnh" value={customLocation} onChange={(e) => setCustomLocation(e.target.value)} />
+
+          {/* Partner Selection - Nhà hàng / Khách sạn */}
+          <div>
+            <Label>Chọn Nhà hàng / Khách sạn</Label>
+            <Select onValueChange={(val) => setPartnerId(val)} value={partnerId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn nhà hàng hoặc khách sạn" />
+              </SelectTrigger>
+              <SelectContent>
+                {partners.map((partner) => (
+                  <SelectItem key={partner._id} value={partner._id}>
+                    {partner.company_name} - {partner.partner_type} ({partner.region})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Select Services */}
           <div>

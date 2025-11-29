@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Calendar, MapPin, Star, Users, CreditCard, User, Mail, Phone, X, Ticket } from 'lucide-react'
+import Header from '@/components/Header'
 
 export default function BookingsPage() {
   const [events, setEvents] = useState([])
@@ -119,30 +120,8 @@ export default function BookingsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-sky-600">
-            <a href="/">Pladivo</a>
-          </div>
-          
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="/" className="text-gray-700 hover:text-sky-600 transition-colors">Trang chủ</a>
-            <a href="/about" className="text-gray-700 hover:text-sky-600 transition-colors">Giới thiệu</a>
-            <a href="/guide" className="text-gray-700 hover:text-sky-600 transition-colors">Hướng dẫn</a>
-            <a href="/events" className="text-gray-700 hover:text-sky-600 transition-colors">Sự kiện</a>
-            <a href="/services" className="text-gray-700 hover:text-sky-600 transition-colors">Dịch vụ</a>
-          </nav>
-          
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" className="text-sky-600 border-sky-600 hover:bg-sky-50">
-              <a href="/login">Đăng nhập</a>
-            </Button>
-            <Button className="bg-sky-600 hover:bg-sky-700 text-white">
-              <a href="/signup">Tạo tài khoản</a>
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Header */}
+      <Header activePage="events" />
 
       <main className="container mx-auto px-4 py-8">
         {/* Header */}

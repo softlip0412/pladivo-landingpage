@@ -1,37 +1,14 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Users, Target, Award, Heart } from 'lucide-react'
+import Header from '@/components/Header'
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-sky-600">
-            <a href="/">Pladivo</a>
-          </div>
-          
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="/" className="text-gray-700 hover:text-sky-600 transition-colors">Trang chủ</a>
-            <a href="/about" className="text-sky-600 font-semibold">Giới thiệu</a>
-            <a href="/guide" className="text-gray-700 hover:text-sky-600 transition-colors">Hướng dẫn</a>
-            <a href="/events" className="text-gray-700 hover:text-sky-600 transition-colors">Sự kiện</a>
-            <a href="/services" className="text-gray-700 hover:text-sky-600 transition-colors">Dịch vụ</a>
-          </nav>
-          
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" className="text-sky-600 border-sky-600 hover:bg-sky-50">
-              <a href="/login">Đăng nhập</a>
-            </Button>
-            <Button className="bg-sky-600 hover:bg-sky-700 text-white">
-              <a href="/signup">Tạo tài khoản</a>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header activePage="about" />
 
       <main>
         {/* Hero Section */}

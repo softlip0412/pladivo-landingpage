@@ -25,6 +25,14 @@ const BookingSchema = new mongoose.Schema(
       },
     ],
 
+    allow_auditing: { type: Boolean, default: false },
+    auditing_areas: [
+      {
+        area_type: { type: String, required: true },
+        quantity: { type: Number, default: 0 },
+      },
+    ],
+
     customer_name: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
