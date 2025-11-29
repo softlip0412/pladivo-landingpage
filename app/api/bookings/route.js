@@ -70,9 +70,39 @@ export async function POST(request) {
       }
     }
 
+    let ticketsArray = [];
+    if (
+      data.tickets &&
+      typeof data.tickets === "object" &&
+      !Array.isArray(data.tickets)
+    ) {
+      ticketsArray = Object.entries(data.tickets).map(([type, quantity]) => ({
+        type,
+        quantity,
+      }));
+    } else if (Array.isArray(data.tickets)) {
+      ticketsArray = data.tickets;
+    }
+
+    if (!Array.isArray(ticketsArray) || ticketsArray.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Tickets phải là một mảng không rỗng" },
+        { status: 400 }
+      );
+    }
+
+    for (let i = 0; i < ticketsArray.length; i++) {
+      if (!ticketsArray[i].type) {
+        return NextResponse.json(
+          { success: false, message: `Thiếu type cho ticket ${i}` },
+          { status: 400 }
+        );
+      }
+    }
     // ✅ Lưu kèm user_id từ token
     const booking = await Booking.create({
       ...data,
+      tickets: ticketsArray,
       user_id: user?.user_id, // Lấy từ token
       booked_at: new Date(),
     });
@@ -90,7 +120,6 @@ export async function POST(request) {
     );
   }
 }
-
 
 // ✅ PATCH: Cập nhật trạng thái booking
 export async function PATCH(request) {

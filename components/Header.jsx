@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { useState } from "react"
-import { useAuth } from "@/context/AuthContext"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,14 +20,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   UserCircle,
   Heart,
@@ -41,143 +41,146 @@ import {
   Building,
   MapPin,
   CreditCard,
-} from "lucide-react"
-import BookingDialog from "@/app/booking/page"
-import { apiFetch } from "@/lib/api"
-import { toast } from "sonner"
+} from "lucide-react";
+import BookingDialog from "@/app/booking/page";
+import { apiFetch } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function Header({ activePage = "" }) {
-  const { user, setUser, logout, loading } = useAuth()
-  
+  const { user, setUser, logout, loading } = useAuth();
+
   // Profile Dialog State
-  const [showProfileDialog, setShowProfileDialog] = useState(false)
-  const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [profileFormData, setProfileFormData] = useState({})
-  const [avatarFile, setAvatarFile] = useState(null)
-  const [avatarPreview, setAvatarPreview] = useState(null)
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [profileFormData, setProfileFormData] = useState({});
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const navItems = [
     { href: "/", label: "Trang chủ", key: "home" },
     { href: "/about", label: "Giới thiệu", key: "about" },
     { href: "/guide", label: "Hướng dẫn", key: "guide" },
     { href: "/events", label: "Sự kiện", key: "events" },
+    { href: "/blogs", label: "Blogs", key: "blogs" },
     { href: "/services", label: "Dịch vụ", key: "services" },
-  ]
+  ];
 
   // Profile Handlers
   const handleEditProfile = () => {
     setProfileFormData({
-      full_name: user.profile?.full_name || '',
-      date_of_birth: user.profile?.date_of_birth ? new Date(user.profile.date_of_birth).toISOString().split('T')[0] : '',
-      gender: user.profile?.gender || '',
-      bio: user.profile?.bio || '',
-      company_name: user.profile?.company_name || '',
-      address: user.profile?.address || '',
-      tax_code: user.profile?.tax_code || '',
-      payment_info: user.profile?.payment_info || '',
-      image: user.profile?.image || '',
-    })
-    setAvatarPreview(user.profile?.image || null)
-    setAvatarFile(null)
-    setIsEditingProfile(true)
-  }
+      full_name: user.profile?.full_name || "",
+      date_of_birth: user.profile?.date_of_birth
+        ? new Date(user.profile.date_of_birth).toISOString().split("T")[0]
+        : "",
+      gender: user.profile?.gender || "",
+      bio: user.profile?.bio || "",
+      company_name: user.profile?.company_name || "",
+      address: user.profile?.address || "",
+      tax_code: user.profile?.tax_code || "",
+      payment_info: user.profile?.payment_info || "",
+      image: user.profile?.image || "",
+    });
+    setAvatarPreview(user.profile?.image || null);
+    setAvatarFile(null);
+    setIsEditingProfile(true);
+  };
 
   const handleFormChange = (field, value) => {
-    setProfileFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setProfileFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleCancelEdit = () => {
-    setIsEditingProfile(false)
-    setProfileFormData({})
-    setAvatarFile(null)
-    setAvatarPreview(null)
-  }
+    setIsEditingProfile(false);
+    setProfileFormData({});
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
 
   const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setAvatarFile(file)
+      setAvatarFile(file);
       // Create preview
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setAvatarPreview(reader.result)
-      }
-      reader.readAsDataURL(file)
+        setAvatarPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleSaveProfile = async () => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
-      let avatarUrl = profileFormData.image
+      let avatarUrl = profileFormData.image;
 
       // Upload avatar if a new file is selected
       if (avatarFile) {
-        setIsUploadingAvatar(true)
-        const formData = new FormData()
-        formData.append('file', avatarFile)
+        setIsUploadingAvatar(true);
+        const formData = new FormData();
+        formData.append("file", avatarFile);
 
-        const uploadRes = await apiFetch('/api/upload/avatar', {
-          method: 'POST',
+        const uploadRes = await apiFetch("/api/upload/avatar", {
+          method: "POST",
           body: formData,
-        })
+        });
 
-        const uploadData = await uploadRes.json()
+        const uploadData = await uploadRes.json();
 
         if (!uploadRes.ok) {
-          toast.error(uploadData.error || 'Upload avatar thất bại')
-          setIsUploadingAvatar(false)
-          setIsSaving(false)
-          return
+          toast.error(uploadData.error || "Upload avatar thất bại");
+          setIsUploadingAvatar(false);
+          setIsSaving(false);
+          return;
         }
 
-        avatarUrl = uploadData.url
-        setIsUploadingAvatar(false)
+        avatarUrl = uploadData.url;
+        setIsUploadingAvatar(false);
       }
 
       // Update profile with avatar URL
       const dataToSend = {
         ...profileFormData,
         image: avatarUrl,
-      }
-      
-      console.log('Sending profile data:', dataToSend)
-      
-      const res = await apiFetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend),
-      })
+      };
 
-      const data = await res.json()
+      console.log("Sending profile data:", dataToSend);
+
+      const res = await apiFetch("/api/auth/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+      });
+
+      const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || 'Cập nhật thất bại')
-        return
+        toast.error(data.error || "Cập nhật thất bại");
+        return;
       }
 
-      toast.success('Cập nhật thông tin thành công!')
-      
+      toast.success("Cập nhật thông tin thành công!");
+
       // Refresh user data
-      const userRes = await apiFetch('/api/auth/me')
+      const userRes = await apiFetch("/api/auth/me");
       if (userRes.ok) {
-        const userData = await userRes.json()
-        setUser(userData.user)
+        const userData = await userRes.json();
+        setUser(userData.user);
       }
 
-      setIsEditingProfile(false)
-      setProfileFormData({})
-      setAvatarFile(null)
-      setAvatarPreview(null)
+      setIsEditingProfile(false);
+      setProfileFormData({});
+      setAvatarFile(null);
+      setAvatarPreview(null);
     } catch (error) {
-      console.error('Save profile error:', error)
-      toast.error('Có lỗi xảy ra, vui lòng thử lại')
+      console.error("Save profile error:", error);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <>
@@ -212,7 +215,7 @@ export default function Header({ activePage = "" }) {
               <>
                 {/* Nút mở Booking Dialog */}
                 <BookingDialog />
-                
+
                 {/* User Dropdown Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -227,7 +230,9 @@ export default function Header({ activePage = "" }) {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.username}</p>
+                        <p className="text-sm font-medium leading-none">
+                          {user.username}
+                        </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user.email}
                         </p>
@@ -242,19 +247,28 @@ export default function Header({ activePage = "" }) {
                       <span>Thông tin cá nhân</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <a href="/wishlist" className="flex items-center cursor-pointer">
+                      <a
+                        href="/wishlist"
+                        className="flex items-center cursor-pointer"
+                      >
                         <Heart className="mr-2 h-4 w-4" />
                         <span>Wishlist</span>
                       </a>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <a href="/my-bookings" className="flex items-center cursor-pointer">
+                      <a
+                        href="/my-bookings"
+                        className="flex items-center cursor-pointer"
+                      >
                         <Calendar className="mr-2 h-4 w-4" />
                         <span>Lịch sử đơn đặt</span>
                       </a>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <a href="/contracts" className="flex items-center cursor-pointer">
+                      <a
+                        href="/contracts"
+                        className="flex items-center cursor-pointer"
+                      >
                         <FileText className="mr-2 h-4 w-4" />
                         <span>Hợp đồng</span>
                       </a>
@@ -272,7 +286,10 @@ export default function Header({ activePage = "" }) {
               </>
             ) : (
               <>
-                <Button variant="outline" className="text-sky-600 border-sky-600 hover:bg-sky-50">
+                <Button
+                  variant="outline"
+                  className="text-sky-600 border-sky-600 hover:bg-sky-50"
+                >
                   <a href="/login">Đăng nhập</a>
                 </Button>
                 <Button className="bg-sky-600 hover:bg-sky-700 text-white">
@@ -293,7 +310,9 @@ export default function Header({ activePage = "" }) {
                 Thông tin cá nhân
               </DialogTitle>
               <DialogDescription>
-                {isEditingProfile ? 'Cập nhật thông tin cá nhân của bạn' : 'Xem thông tin chi tiết về tài khoản của bạn'}
+                {isEditingProfile
+                  ? "Cập nhật thông tin cá nhân của bạn"
+                  : "Xem thông tin chi tiết về tài khoản của bạn"}
               </DialogDescription>
             </DialogHeader>
 
@@ -325,7 +344,9 @@ export default function Header({ activePage = "" }) {
                       <div className="flex items-center gap-3">
                         <UserCircle className="h-5 w-5 text-sky-600" />
                         <div>
-                          <p className="text-sm text-gray-500">Tên người dùng</p>
+                          <p className="text-sm text-gray-500">
+                            Tên người dùng
+                          </p>
                           <p className="font-medium">{user.username}</p>
                         </div>
                       </div>
@@ -340,7 +361,9 @@ export default function Header({ activePage = "" }) {
                         <div className="flex items-center gap-3">
                           <Phone className="h-5 w-5 text-sky-600" />
                           <div>
-                            <p className="text-sm text-gray-500">Số điện thoại</p>
+                            <p className="text-sm text-gray-500">
+                              Số điện thoại
+                            </p>
                             <p className="font-medium">{user.phone}</p>
                           </div>
                         </div>
@@ -367,7 +390,9 @@ export default function Header({ activePage = "" }) {
                             <User className="h-5 w-5 text-sky-600" />
                             <div>
                               <p className="text-sm text-gray-500">Họ và tên</p>
-                              <p className="font-medium">{user.profile.full_name}</p>
+                              <p className="font-medium">
+                                {user.profile.full_name}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -376,7 +401,11 @@ export default function Header({ activePage = "" }) {
                             <Calendar className="h-5 w-5 text-sky-600" />
                             <div>
                               <p className="text-sm text-gray-500">Ngày sinh</p>
-                              <p className="font-medium">{new Date(user.profile.date_of_birth).toLocaleDateString('vi-VN')}</p>
+                              <p className="font-medium">
+                                {new Date(
+                                  user.profile.date_of_birth
+                                ).toLocaleDateString("vi-VN")}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -386,7 +415,11 @@ export default function Header({ activePage = "" }) {
                             <div>
                               <p className="text-sm text-gray-500">Giới tính</p>
                               <p className="font-medium capitalize">
-                                {user.profile.gender === 'male' ? 'Nam' : user.profile.gender === 'female' ? 'Nữ' : 'Khác'}
+                                {user.profile.gender === "male"
+                                  ? "Nam"
+                                  : user.profile.gender === "female"
+                                  ? "Nữ"
+                                  : "Khác"}
                               </p>
                             </div>
                           </div>
@@ -395,7 +428,9 @@ export default function Header({ activePage = "" }) {
                           <div className="flex items-start gap-3">
                             <FileText className="h-5 w-5 text-sky-600 mt-1" />
                             <div>
-                              <p className="text-sm text-gray-500">Giới thiệu</p>
+                              <p className="text-sm text-gray-500">
+                                Giới thiệu
+                              </p>
                               <p className="font-medium">{user.profile.bio}</p>
                             </div>
                           </div>
@@ -405,7 +440,9 @@ export default function Header({ activePage = "" }) {
                             <Building className="h-5 w-5 text-sky-600" />
                             <div>
                               <p className="text-sm text-gray-500">Công ty</p>
-                              <p className="font-medium">{user.profile.company_name}</p>
+                              <p className="font-medium">
+                                {user.profile.company_name}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -414,7 +451,9 @@ export default function Header({ activePage = "" }) {
                             <MapPin className="h-5 w-5 text-sky-600" />
                             <div>
                               <p className="text-sm text-gray-500">Địa chỉ</p>
-                              <p className="font-medium">{user.profile.address}</p>
+                              <p className="font-medium">
+                                {user.profile.address}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -422,8 +461,12 @@ export default function Header({ activePage = "" }) {
                           <div className="flex items-center gap-3">
                             <FileText className="h-5 w-5 text-sky-600" />
                             <div>
-                              <p className="text-sm text-gray-500">Mã số thuế</p>
-                              <p className="font-medium">{user.profile.tax_code}</p>
+                              <p className="text-sm text-gray-500">
+                                Mã số thuế
+                              </p>
+                              <p className="font-medium">
+                                {user.profile.tax_code}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -431,8 +474,12 @@ export default function Header({ activePage = "" }) {
                           <div className="flex items-center gap-3">
                             <CreditCard className="h-5 w-5 text-sky-600" />
                             <div>
-                              <p className="text-sm text-gray-500">Thông tin thanh toán</p>
-                              <p className="font-medium">{user.profile.payment_info}</p>
+                              <p className="text-sm text-gray-500">
+                                Thông tin thanh toán
+                              </p>
+                              <p className="font-medium">
+                                {user.profile.payment_info}
+                              </p>
                             </div>
                           </div>
                         )}
@@ -506,7 +553,9 @@ export default function Header({ activePage = "" }) {
                       <Input
                         id="full_name"
                         value={profileFormData.full_name}
-                        onChange={(e) => handleFormChange('full_name', e.target.value)}
+                        onChange={(e) =>
+                          handleFormChange("full_name", e.target.value)
+                        }
                         placeholder="Nhập họ và tên"
                       />
                     </div>
@@ -516,7 +565,9 @@ export default function Header({ activePage = "" }) {
                         id="date_of_birth"
                         type="date"
                         value={profileFormData.date_of_birth}
-                        onChange={(e) => handleFormChange('date_of_birth', e.target.value)}
+                        onChange={(e) =>
+                          handleFormChange("date_of_birth", e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -525,7 +576,9 @@ export default function Header({ activePage = "" }) {
                     <Label htmlFor="gender">Giới tính</Label>
                     <Select
                       value={profileFormData.gender}
-                      onValueChange={(value) => handleFormChange('gender', value)}
+                      onValueChange={(value) =>
+                        handleFormChange("gender", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Chọn giới tính" />
@@ -543,7 +596,7 @@ export default function Header({ activePage = "" }) {
                     <Textarea
                       id="bio"
                       value={profileFormData.bio}
-                      onChange={(e) => handleFormChange('bio', e.target.value)}
+                      onChange={(e) => handleFormChange("bio", e.target.value)}
                       placeholder="Giới thiệu ngắn về bản thân"
                       rows={3}
                     />
@@ -554,7 +607,9 @@ export default function Header({ activePage = "" }) {
                     <Input
                       id="company_name"
                       value={profileFormData.company_name}
-                      onChange={(e) => handleFormChange('company_name', e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("company_name", e.target.value)
+                      }
                       placeholder="Tên công ty"
                     />
                   </div>
@@ -564,7 +619,9 @@ export default function Header({ activePage = "" }) {
                     <Input
                       id="address"
                       value={profileFormData.address}
-                      onChange={(e) => handleFormChange('address', e.target.value)}
+                      onChange={(e) =>
+                        handleFormChange("address", e.target.value)
+                      }
                       placeholder="Địa chỉ"
                     />
                   </div>
@@ -575,7 +632,9 @@ export default function Header({ activePage = "" }) {
                       <Input
                         id="tax_code"
                         value={profileFormData.tax_code}
-                        onChange={(e) => handleFormChange('tax_code', e.target.value)}
+                        onChange={(e) =>
+                          handleFormChange("tax_code", e.target.value)
+                        }
                         placeholder="Mã số thuế"
                       />
                     </div>
@@ -584,7 +643,9 @@ export default function Header({ activePage = "" }) {
                       <Input
                         id="payment_info"
                         value={profileFormData.payment_info}
-                        onChange={(e) => handleFormChange('payment_info', e.target.value)}
+                        onChange={(e) =>
+                          handleFormChange("payment_info", e.target.value)
+                        }
                         placeholder="Số tài khoản, v.v."
                       />
                     </div>
@@ -597,7 +658,7 @@ export default function Header({ activePage = "" }) {
                     disabled={isSaving}
                     className="bg-sky-600 hover:bg-sky-700"
                   >
-                    {isSaving ? 'Đang lưu...' : 'Lưu'}
+                    {isSaving ? "Đang lưu..." : "Lưu"}
                   </Button>
                   <Button
                     onClick={handleCancelEdit}
@@ -613,5 +674,5 @@ export default function Header({ activePage = "" }) {
         </Dialog>
       )}
     </>
-  )
+  );
 }
