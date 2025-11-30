@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Booking from "@/models/booking";
 import EventPlan from "@/models/EventPlan";
+import Staff from "@/models/Staff";
 import { authenticateToken } from "@/lib/auth";
 
 export async function GET(request) {
@@ -24,7 +25,9 @@ export async function GET(request) {
     // Fetch event plans for each booking
     const bookingsWithEventPlans = await Promise.all(
       bookings.map(async (booking) => {
-        const eventPlan = await EventPlan.findOne({ booking_id: booking._id }).lean();
+        const eventPlan = await EventPlan.findOne({ booking_id: booking._id })
+          .populate("step2.staffAssign.manager.id", "full_name avatar_url")
+          .lean();
         return {
           ...booking,
           eventPlan: eventPlan || null,
