@@ -7,13 +7,20 @@ import nodemailer from "nodemailer"
 
 export async function POST(request) {
   await connectDB()
-  const { username, email, password, phone, role = "customer" } = await request.json()
+  const { email, password } = await request.json()
+
+  if (!email || !password) {
+    return Response.json(
+      { error: "Vui lòng nhập đầy đủ email và mật khẩu" },
+      { status: 400 }
+    )
+  }
 
   // Check user tồn tại
-  const existingUser = await User.findOne({ $or: [{ email }, { username }] })
+  const existingUser = await User.findOne({ email })
   if (existingUser) {
     return Response.json(
-      { error: "Email hoặc username đã tồn tại" },
+      { error: "Email đã tồn tại" },
       { status: 400 }
     )
   }
@@ -30,14 +37,14 @@ export async function POST(request) {
 
   const hashedPassword = await bcrypt.hash(password, 10)
 
+  // Generate temporary username
+  const tempUsername = `user_${crypto.randomBytes(4).toString("hex")}`
+
   const newUser = new User({
-    username,
+    username: tempUsername,
     email,
     password_hash: hashedPassword,
-    phone,
-    role: ["customer", "staff", "manager", "admin"].includes(role)
-      ? role
-      : "customer",
+    role: "customer",
     status: "pending",
   })
   await newUser.save()
@@ -67,7 +74,7 @@ export async function POST(request) {
     to: email,
     subject: "Xác minh tài khoản của bạn",
     html: `
-      <h2>Xin chào ${username},</h2>
+      <h2>Xin chào,</h2>
       <p>Cảm ơn bạn đã đăng ký. Vui lòng nhấp vào link bên dưới để xác minh email:</p>
       <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
       <p>Link có hiệu lực trong 24 giờ.</p>
@@ -80,10 +87,7 @@ export async function POST(request) {
         "Đăng ký thành công. Vui lòng kiểm tra email để xác minh tài khoản.",
       user: {
         user_id: newUser._id,
-        username: newUser.username,
         email: newUser.email,
-        phone: newUser.phone,
-        role: newUser.role,
         status: newUser.status,
       },
     },

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const UserSchema = new mongoose.Schema(
   {
     username: { type: String, required: true, unique: true },
-    password_hash: { type: String, required: true },
+    password_hash: { type: String }, // Optional for OAuth users
     email: { type: String, unique: true },
     phone: String,
     role: {
@@ -13,9 +13,17 @@ const UserSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "active", "inactive"],
+      enum: ["pending", "verified", "active", "inactive"],
       default: "pending",
     },
+    // OAuth fields
+    provider: {
+      type: String,
+      enum: ["email", "google"],
+      default: "email",
+    },
+    provider_id: { type: String }, // Google user ID
+    image: { type: String }, // Profile picture URL
   },
   { timestamps: true }
 );

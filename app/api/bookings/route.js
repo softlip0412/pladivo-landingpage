@@ -84,11 +84,14 @@ export async function POST(request) {
       ticketsArray = data.tickets;
     }
 
-    if (!Array.isArray(ticketsArray) || ticketsArray.length === 0) {
-      return NextResponse.json(
-        { success: false, message: "Tickets phải là một mảng không rỗng" },
-        { status: 400 }
-      );
+    // 🟢 Chỉ bắt buộc tickets nếu là "Sự kiện đại chúng"
+    if (data.event_type === "Sự kiện đại chúng") {
+      if (!Array.isArray(ticketsArray) || ticketsArray.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "Tickets phải là một mảng không rỗng đối với Sự kiện đại chúng" },
+          { status: 400 }
+        );
+      }
     }
 
     for (let i = 0; i < ticketsArray.length; i++) {

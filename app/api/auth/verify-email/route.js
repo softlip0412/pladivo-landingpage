@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import EmailVerificationToken from "@/models/EmailVerificationToken";
+import { signAccessToken } from "@/lib/auth";
 
 export async function POST(request) {
   await connectDB();
@@ -20,12 +21,32 @@ export async function POST(request) {
     return Response.json({ error: "Token expired" }, { status: 400 });
   }
 
-  await User.updateOne(
-    { _id: record.user_id },
-    { $set: { status: "active" } }
-  );
+  const user = await User.findById(record.user_id);
+  if (!user) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
+  // Update user status to 'verified' (intermediate state)
+  user.status = "verified";
+  await user.save();
 
   await EmailVerificationToken.deleteOne({ _id: record._id });
 
-  return Response.json({ message: "Email verified successfully" }, { status: 200 });
+  // Generate temporary access token for profile completion
+  const accessToken = signAccessToken({
+    user_id: user._id,
+    email: user.email,
+    role: user.role,
+    status: user.status, // verified
+  });
+
+  return Response.json({ 
+    message: "Email verified successfully",
+    accessToken,
+    user: {
+        user_id: user._id,
+        email: user.email,
+        status: user.status
+    }
+  }, { status: 200 });
 }

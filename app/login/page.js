@@ -47,6 +47,17 @@ export default function LoginPage() {
         return
       }
 
+      if (data.redirect) {
+        toast.info(data.message || "Vui lòng hoàn tất hồ sơ")
+        if (data.accessToken) {
+            localStorage.setItem("tempAccessToken", data.accessToken)
+        }
+        setTimeout(() => {
+            window.location.href = data.redirect
+        }, 1000)
+        return
+      }
+
       toast.success("Đăng nhập thành công 🎉")
       console.log("User:", data.user)
 
