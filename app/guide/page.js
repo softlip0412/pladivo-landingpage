@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Calendar, CreditCard, Star, ArrowRight } from 'lucide-react'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 export default function GuidePage() {
   return (
@@ -13,43 +14,43 @@ export default function GuidePage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-r from-sky-50 to-blue-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-6">Cách sử dụng Pladivo</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">Cách sử dụng Pladivo</h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Làm theo hướng dẫn từng bước để khám phá, đặt chỗ và quản lý các sự kiện và dịch vụ tuyệt vời.
             </p>
           </div>
         </section>
 
         {/* Step-by-Step Guide */}
-        <section className="py-16 bg-white">
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">Bắt đầu</h2>
+            <h2 className="text-4xl font-bold text-gray-900 text-center mb-16">Bắt đầu</h2>
             
-            <div className="space-y-12">
+            <div className="space-y-16">
               {/* Step 1 */}
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="md:w-1/2">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-sky-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4">1</div>
-                    <h3 className="text-2xl font-bold text-gray-800">Tìm kiếm & Khám phá</h3>
+                  <div className="flex items-center mb-6">
+                    <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold mr-4 text-xl shadow-lg">1</div>
+                    <h3 className="text-3xl font-bold text-gray-900">Tìm kiếm & Khám phá</h3>
                   </div>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                     Sử dụng chức năng tìm kiếm mạnh mẽ để tìm sự kiện và dịch vụ phù hợp với nhu cầu của bạn. 
                     Lọc theo danh mục, địa điểm, ngày và giá để thu hẹp lựa chọn.
                   </p>
-                  <ul className="space-y-2 text-gray-600">
+                  <ul className="space-y-3 text-gray-600">
                     <li className="flex items-center">
-                      <Search className="w-4 h-4 text-sky-600 mr-2" />
+                      <Search className="w-5 h-5 text-blue-600 mr-3" />
                       Duyệt theo danh mục hoặc dùng thanh tìm kiếm
                     </li>
                     <li className="flex items-center">
-                      <Calendar className="w-4 h-4 text-sky-600 mr-2" />
+                      <Calendar className="w-5 h-5 text-blue-600 mr-3" />
                       Lọc theo ngày và tình trạng chỗ
                     </li>
                     <li className="flex items-center">
-                      <Star className="w-4 h-4 text-sky-600 mr-2" />
+                      <Star className="w-5 h-5 text-blue-600 mr-3" />
                       Xem đánh giá và nhận xét
                     </li>
                   </ul>
@@ -58,7 +59,7 @@ export default function GuidePage() {
                   <img 
                     src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&h=300&fit=crop" 
                     alt="Tìm kiếm và Khám phá"
-                    className="rounded-lg shadow-lg w-full"
+                    className="rounded-2xl shadow-2xl w-full hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               </div>
@@ -66,25 +67,25 @@ export default function GuidePage() {
               {/* Step 2 */}
               <div className="flex flex-col md:flex-row-reverse items-center gap-8">
                 <div className="md:w-1/2">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-sky-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4">2</div>
-                    <h3 className="text-2xl font-bold text-gray-800">So sánh & Chọn</h3>
+                  <div className="flex items-center mb-6">
+                    <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold mr-4 text-xl shadow-lg">2</div>
+                    <h3 className="text-3xl font-bold text-gray-900">So sánh & Chọn</h3>
                   </div>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                     So sánh các lựa chọn dựa trên giá, địa điểm, đánh giá và tính năng. 
                     Đọc mô tả chi tiết và nhận xét từ khách hàng để quyết định chính xác.
                   </p>
-                  <ul className="space-y-2 text-gray-600">
+                  <ul className="space-y-3 text-gray-600">
                     <li className="flex items-center">
-                      <ArrowRight className="w-4 h-4 text-sky-600 mr-2" />
+                      <ArrowRight className="w-5 h-5 text-blue-600 mr-3" />
                       Xem thông tin chi tiết sự kiện/dịch vụ
                     </li>
                     <li className="flex items-center">
-                      <ArrowRight className="w-4 h-4 text-sky-600 mr-2" />
+                      <ArrowRight className="w-5 h-5 text-blue-600 mr-3" />
                       So sánh giá và gói dịch vụ
                     </li>
                     <li className="flex items-center">
-                      <ArrowRight className="w-4 h-4 text-sky-600 mr-2" />
+                      <ArrowRight className="w-5 h-5 text-blue-600 mr-3" />
                       Đọc nhận xét từ khách hàng
                     </li>
                   </ul>
@@ -93,7 +94,7 @@ export default function GuidePage() {
                   <img 
                     src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=300&fit=crop" 
                     alt="So sánh và Chọn"
-                    className="rounded-lg shadow-lg w-full"
+                    className="rounded-2xl shadow-2xl w-full hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               </div>
@@ -101,25 +102,25 @@ export default function GuidePage() {
               {/* Step 3 */}
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="md:w-1/2">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-sky-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-4">3</div>
-                    <h3 className="text-2xl font-bold text-gray-800">Đặt chỗ & Thanh toán</h3>
+                  <div className="flex items-center mb-6">
+                    <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold mr-4 text-xl shadow-lg">3</div>
+                    <h3 className="text-3xl font-bold text-gray-900">Đặt chỗ & Thanh toán</h3>
                   </div>
-                  <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                     Hoàn tất đặt chỗ dễ dàng với quy trình thanh toán an toàn. Có nhiều phương thức thanh toán, 
                     xác nhận ngay lập tức và gửi chi tiết đặt chỗ qua email.
                   </p>
-                  <ul className="space-y-2 text-gray-600">
+                  <ul className="space-y-3 text-gray-600">
                     <li className="flex items-center">
-                      <CreditCard className="w-4 h-4 text-sky-600 mr-2" />
+                      <CreditCard className="w-5 h-5 text-blue-600 mr-3" />
                       Thanh toán an toàn
                     </li>
                     <li className="flex items-center">
-                      <Calendar className="w-4 h-4 text-sky-600 mr-2" />
+                      <Calendar className="w-5 h-5 text-blue-600 mr-3" />
                       Xác nhận đặt chỗ ngay
                     </li>
                     <li className="flex items-center">
-                      <ArrowRight className="w-4 h-4 text-sky-600 mr-2" />
+                      <ArrowRight className="w-5 h-5 text-blue-600 mr-3" />
                       Nhận email xác nhận & hóa đơn
                     </li>
                   </ul>
@@ -128,7 +129,7 @@ export default function GuidePage() {
                   <img 
                     src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=500&h=300&fit=crop" 
                     alt="Đặt chỗ và Thanh toán"
-                    className="rounded-lg shadow-lg w-full"
+                    className="rounded-2xl shadow-2xl w-full hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               </div>
@@ -137,14 +138,16 @@ export default function GuidePage() {
         </section>
 
         {/* Features Overview */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 to-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">Tính năng nổi bật</h2>
+            <h2 className="text-4xl font-bold text-gray-900 text-center mb-16">Tính năng nổi bật</h2>
             <div className="grid md:grid-cols-3 gap-8">
-              <Card>
+              <Card className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Search className="w-6 h-6 text-sky-600 mr-2" />
+                    <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mr-3">
+                      <Search className="w-6 h-6 text-blue-600" />
+                    </div>
                     Tìm kiếm nâng cao
                   </CardTitle>
                 </CardHeader>
@@ -155,10 +158,12 @@ export default function GuidePage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Star className="w-6 h-6 text-sky-600 mr-2" />
+                    <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mr-3">
+                      <Star className="w-6 h-6 text-blue-600" />
+                    </div>
                     Đánh giá & Nhận xét
                   </CardTitle>
                 </CardHeader>
@@ -170,10 +175,12 @@ export default function GuidePage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <CreditCard className="w-6 h-6 text-sky-600 mr-2" />
+                    <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mr-3">
+                      <CreditCard className="w-6 h-6 text-blue-600" />
+                    </div>
                     Thanh toán an toàn
                   </CardTitle>
                 </CardHeader>
@@ -189,13 +196,13 @@ export default function GuidePage() {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-16 bg-white">
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">Câu hỏi thường gặp</h2>
+            <h2 className="text-4xl font-bold text-gray-900 text-center mb-16">Câu hỏi thường gặp</h2>
             <div className="max-w-3xl mx-auto space-y-6">
-              <Card>
+              <Card className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all">
                 <CardHeader>
-                  <CardTitle>Tôi có thể hủy hoặc chỉnh sửa đặt chỗ như thế nào?</CardTitle>
+                  <CardTitle className="text-gray-900">Tôi có thể hủy hoặc chỉnh sửa đặt chỗ như thế nào?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600">
@@ -205,9 +212,9 @@ export default function GuidePage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all">
                 <CardHeader>
-                  <CardTitle>Có phí đặt chỗ không?</CardTitle>
+                  <CardTitle className="text-gray-900">Có phí đặt chỗ không?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600">
@@ -217,9 +224,9 @@ export default function GuidePage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all">
                 <CardHeader>
-                  <CardTitle>Tôi liên hệ hỗ trợ khách hàng bằng cách nào?</CardTitle>
+                  <CardTitle className="text-gray-900">Tôi liên hệ hỗ trợ khách hàng bằng cách nào?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600">
@@ -229,9 +236,9 @@ export default function GuidePage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all">
                 <CardHeader>
-                  <CardTitle>Tôi có thể đặt hộ người khác không?</CardTitle>
+                  <CardTitle className="text-gray-900">Tôi có thể đặt hộ người khác không?</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600">
@@ -244,17 +251,17 @@ export default function GuidePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-sky-600 text-white text-center">
+        <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white text-center">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-4">Sẵn sàng bắt đầu chưa?</h2>
-            <p className="text-xl text-sky-100 mb-8 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold mb-6">Sẵn sàng bắt đầu chưa?</h2>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto leading-relaxed">
               Tham gia cùng hàng ngàn khách hàng hài lòng và bắt đầu đặt sự kiện & dịch vụ ngay hôm nay.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="bg-white text-sky-600 hover:bg-gray-100">
+              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8">
                 <a href="/events">Khám phá sự kiện</a>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-sky-600">
+              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8">
                 <a href="/services">Khám phá dịch vụ</a>
               </Button>
             </div>
@@ -262,51 +269,8 @@ export default function GuidePage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
-            <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-sky-400 mb-4">Pladivo</h3>
-              <p className="text-gray-300 mb-4">
-                Điểm đến hàng đầu để đặt sự kiện & dịch vụ chuyên nghiệp. 
-                Biến khoảnh khắc đáng nhớ trở nên dễ dàng.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Hỗ trợ</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Hỗ trợ khách hàng</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Liên hệ</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Công ty</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="/about" className="hover:text-sky-400 transition-colors">Về chúng tôi</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Tuyển dụng</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Báo chí</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Liên kết nhanh</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="/events" className="hover:text-sky-400 transition-colors">Sự kiện</a></li>
-                <li><a href="/services" className="hover:text-sky-400 transition-colors">Dịch vụ</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Đối tác</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2024 Pladivo. Mọi quyền được bảo lưu.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Footer Component */}
+      <Footer />
     </div>
   )
 }

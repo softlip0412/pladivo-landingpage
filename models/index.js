@@ -14,3 +14,7 @@ export { default as StaffProfile } from "./StaffProfile.js";
 export { default as Task } from "./Task.js";
 export { default as Equipment } from "./Equipment.js";
 export { default as EmailVerificationToken } from "./EmailVerificationToken.js";
+export { default as Booking } from "./booking.js";
+export { default as TicketSaleConfig } from "./TicketSaleConfig.js";
+export { default as EventPlan } from "./EventPlan.js";
+

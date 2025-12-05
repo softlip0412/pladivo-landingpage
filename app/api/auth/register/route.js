@@ -44,6 +44,7 @@ export async function POST(request) {
     username: tempUsername,
     email,
     password_hash: hashedPassword,
+    provider: "email",
     role: "customer",
     status: "pending",
   })
@@ -69,16 +70,13 @@ export async function POST(request) {
     },
   })
 
+  const { getVerificationEmailTemplate } = await import("@/lib/emailTemplates")
+
   await transporter.sendMail({
     from: `"Pladivo" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Xác minh tài khoản của bạn",
-    html: `
-      <h2>Xin chào,</h2>
-      <p>Cảm ơn bạn đã đăng ký. Vui lòng nhấp vào link bên dưới để xác minh email:</p>
-      <a href="${verifyUrl}" target="_blank">${verifyUrl}</a>
-      <p>Link có hiệu lực trong 24 giờ.</p>
-    `,
+    subject: "Xác minh tài khoản Pladivo của bạn 🎉",
+    html: getVerificationEmailTemplate(verifyUrl, email),
   })
 
   return Response.json(

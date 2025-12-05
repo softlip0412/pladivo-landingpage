@@ -24,11 +24,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useBookingDialog } from "@/context/BookingDialogContext";
 
 export default function BookingDialog() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [open, setOpen] = useState(false);
+  const { isOpen, setIsOpen } = useBookingDialog();
 
   const [userId, setUserId] = useState("");
   const [services, setServices] = useState([]);
@@ -224,7 +225,7 @@ export default function BookingDialog() {
         toast.success("Đặt booking thành công!", {
           description: "Booking của bạn đã được tạo và đang chờ xác nhận.",
         });
-        setOpen(false);
+        setIsOpen(false);
         resetForm();
       } else {
         toast.error("Lỗi khi đặt booking", {
@@ -242,218 +243,320 @@ export default function BookingDialog() {
   if (!mounted) return null;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Tạo Booking</Button>
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white">Tạo Booking</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Tạo Booking</DialogTitle>
-          <DialogDescription>
-            Điền thông tin sự kiện và dịch vụ tại đây
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-3xl font-bold text-blue-600">Tạo Booking Sự Kiện</DialogTitle>
+          <DialogDescription className="text-base text-gray-600">
+            Điền thông tin chi tiết về sự kiện và dịch vụ bạn cần
           </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4 mt-4" onSubmit={handleSubmit}>
-          {/* Event Type */}
-          <div>
-            <Label>Chọn loại sự kiện</Label>
-            <Select onValueChange={(val) => setEventType(val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn loại sự kiện" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Hội nghị">Hội nghị</SelectItem>
-                <SelectItem value="Sự kiện công ty">Sự kiện công ty</SelectItem>
-                <SelectItem value="Sự kiện đại chúng">Sự kiện đại chúng</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {eventType === "Hội nghị" && (
+        <form className="space-y-6 mt-6" onSubmit={handleSubmit}>
+          {/* Event Type Section */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">1</div>
+              Loại Sự Kiện
+            </h3>
             <div>
-              <Label className="flex items-center gap-2">
-                <Checkbox
-                  checked={allowAuditing}
-                  onCheckedChange={(checked) => setAllowAuditing(checked)}
-                />
-                <span>Có Cho phép đặt chỗ dự thính không?</span>
-              </Label>
-              {allowAuditing && (
-                <div className="mt-2 max-h-60 overflow-y-auto border rounded p-2 space-y-3">
-                  {auditingAreaTypes.map((area) => (
-                    <div key={area.name} className="flex flex-col gap-1 border-b pb-2 last:border-0">
-                      <div className="flex items-center gap-2">
+              <Label className="text-gray-700 font-medium">Chọn loại sự kiện *</Label>
+              <Select onValueChange={(val) => setEventType(val)} value={eventType}>
+                <SelectTrigger className="mt-2 border-2 border-gray-200 focus:border-blue-500">
+                  <SelectValue placeholder="Chọn loại sự kiện" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Hội nghị">Hội nghị</SelectItem>
+                  <SelectItem value="Sự kiện công ty">Sự kiện công ty</SelectItem>
+                  <SelectItem value="Sự kiện đại chúng">Sự kiện đại chúng</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {eventType === "Hội nghị" && (
+              <div className="mt-4 p-4 bg-white rounded-lg border border-blue-200">
+                <Label className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Checkbox
+                    checked={allowAuditing}
+                    onCheckedChange={(checked) => setAllowAuditing(checked)}
+                  />
+                  <span>Có Cho phép đặt chỗ dự thính không?</span>
+                </Label>
+                {allowAuditing && (
+                  <div className="mt-3 max-h-60 overflow-y-auto border rounded-lg p-3 space-y-3 bg-gray-50">
+                    {auditingAreaTypes.map((area) => (
+                      <div key={area.name} className="flex flex-col gap-2 border-b pb-3 last:border-0">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={auditingAreas[area.name] > 0}
+                            onCheckedChange={(checked) => {
+                              if (!checked) handleAuditingAreaChange(area.name, 0);
+                              else handleAuditingAreaChange(area.name, 1);
+                            }}
+                          />
+                          <span className="font-medium text-gray-800">{area.name}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 ml-6">{area.description}</p>
+                        {auditingAreas[area.name] > 0 && (
+                          <div className="ml-6 flex items-center gap-2">
+                            <Label className="text-xs text-gray-600">Số lượng:</Label>
+                            <Input
+                              type="number"
+                              min={1}
+                              value={auditingAreas[area.name]}
+                              onChange={(e) => handleAuditingAreaChange(area.name, e.target.value)}
+                              className="w-24 h-9 text-sm"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {eventType === "Sự kiện đại chúng" && (
+              <div className="mt-4 p-4 bg-white rounded-lg border border-blue-200">
+                <Label className="flex items-center gap-2 text-gray-700 font-medium">
+                  <Checkbox
+                    checked={ticketSales}
+                    onCheckedChange={(checked) => setTicketSales(checked)}
+                  />
+                  <span>Có bán vé không?</span>
+                </Label>
+                {ticketSales && (
+                  <div className="mt-3 max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2 bg-gray-50">
+                    {ticketTypes.map((type) => (
+                      <div key={type} className="flex items-center gap-2 py-1">
                         <Checkbox
-                          checked={auditingAreas[area.name] > 0}
+                          checked={tickets[type] > 0}
                           onCheckedChange={(checked) => {
-                            if (!checked) handleAuditingAreaChange(area.name, 0);
-                            else handleAuditingAreaChange(area.name, 1);
+                            if (!checked) handleTicketChange(type, 0);
+                            else handleTicketChange(type, 1);
                           }}
                         />
-                        <span className="font-medium">{area.name}</span>
-                      </div>
-                      <p className="text-xs text-gray-500 ml-6">{area.description}</p>
-                      {auditingAreas[area.name] > 0 && (
-                        <div className="ml-6 flex items-center gap-2">
-                          <Label className="text-xs">Số lượng:</Label>
+                        <span className="flex-1 text-sm text-gray-700">{type}</span>
+                        {tickets[type] > 0 && (
                           <Input
                             type="number"
                             min={1}
-                            value={auditingAreas[area.name]}
-                            onChange={(e) => handleAuditingAreaChange(area.name, e.target.value)}
-                            className="w-20 h-8 text-sm"
+                            value={tickets[type]}
+                            onChange={(e) => handleTicketChange(type, e.target.value)}
+                            className="w-24 h-9"
                           />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
-          {eventType === "Sự kiện đại chúng" && (
-            <div>
-              <Label className="flex items-center gap-2">
-                <Checkbox
-                  checked={ticketSales}
-                  onCheckedChange={(checked) => setTicketSales(checked)}
+          {/* Customer Info Section */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">2</div>
+              Thông Tin Khách Hàng
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-700 font-medium">Tên khách hàng</Label>
+                <Input 
+                  placeholder="Tên khách hàng" 
+                  value={customerName} 
+                  readOnly 
+                  className="mt-2 bg-gray-100 cursor-not-allowed border-gray-300"
+                  title="Tự động điền từ hồ sơ người dùng"
                 />
-                <span>Có bán vé không?</span>
-              </Label>
-              {ticketSales && (
-                <div className="mt-2 max-h-40 overflow-y-auto border rounded p-2 space-y-1">
-                  {ticketTypes.map((type) => (
-                    <div key={type} className="flex items-center gap-2">
-                      <Checkbox
-                        checked={tickets[type] > 0}
-                        onCheckedChange={(checked) => {
-                          if (!checked) handleTicketChange(type, 0);
-                          else handleTicketChange(type, 1);
-                        }}
-                      />
-                      <span className="flex-1">{type}</span>
-                      {tickets[type] > 0 && (
-                        <Input
-                          type="number"
-                          min={1}
-                          value={tickets[type]}
-                          onChange={(e) => handleTicketChange(type, e.target.value)}
-                          className="w-20"
-                        />
-                      )}
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium">Địa chỉ</Label>
+                <Input 
+                  placeholder="Địa chỉ" 
+                  value={address} 
+                  readOnly 
+                  className="mt-2 bg-gray-100 cursor-not-allowed border-gray-300"
+                  title="Tự động điền từ hồ sơ người dùng"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium">Số điện thoại</Label>
+                <Input 
+                  placeholder="Phone" 
+                  value={phone} 
+                  readOnly 
+                  className="mt-2 bg-gray-100 cursor-not-allowed border-gray-300"
+                  title="Tự động điền từ hồ sơ người dùng"
+                />
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium">Email</Label>
+                <Input 
+                  placeholder="Email" 
+                  value={email} 
+                  readOnly 
+                  className="mt-2 bg-gray-100 cursor-not-allowed border-gray-300"
+                  title="Tự động điền từ hồ sơ người dùng"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Event Details Section */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">3</div>
+              Chi Tiết Sự Kiện
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-700 font-medium">Số lượng khách *</Label>
+                <Input 
+                  type="number" 
+                  placeholder="Số lượng khách" 
+                  value={scale} 
+                  onChange={(e) => setScale(e.target.value)}
+                  className="mt-2 border-2 border-gray-200 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium">Ngày sự kiện *</Label>
+                <Input 
+                  type="date" 
+                  placeholder="Ngày sự kiện" 
+                  value={eventDate} 
+                  onChange={(e) => setEventDate(e.target.value)}
+                  className="mt-2 border-2 border-gray-200 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium">Giờ bắt đầu *</Label>
+                <Input 
+                  type="time" 
+                  placeholder="Giờ bắt đầu" 
+                  value={startTime} 
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="mt-2 border-2 border-gray-200 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-gray-700 font-medium">Giờ kết thúc *</Label>
+                <Input 
+                  type="time" 
+                  placeholder="Giờ kết thúc" 
+                  value={endTime} 
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="mt-2 border-2 border-gray-200 focus:border-blue-500"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Partner & Services Section */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">4</div>
+              Nhà Hàng / Khách Sạn & Dịch Vụ
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-700 font-medium">Chọn Nhà hàng / Khách sạn</Label>
+                <Select onValueChange={(val) => setPartnerId(val)} value={partnerId}>
+                  <SelectTrigger className="mt-2 border-2 border-gray-200 focus:border-blue-500">
+                    <SelectValue placeholder="Chọn nhà hàng hoặc khách sạn" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {partners.map((partner) => (
+                      <SelectItem key={partner._id} value={partner._id}>
+                        {partner.company_name} - {partner.partner_type} ({partner.region})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-gray-700 font-medium">Chọn dịch vụ</Label>
+                <Select onValueChange={(val) => handleAddService(val)}>
+                  <SelectTrigger className="mt-2 border-2 border-gray-200 focus:border-blue-500">
+                    <SelectValue placeholder="Chọn dịch vụ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.map((sv) => (
+                      <SelectItem key={sv._id} value={sv._id}>
+                        {sv.name} - {sv.minPrice} ~ {sv.maxPrice} / {sv.unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Selected Services */}
+              {selectedServices.length > 0 && (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <Label className="text-gray-700 font-medium">Dịch vụ đã chọn:</Label>
+                  {selectedServices.map((s) => (
+                    <div key={s.service_id} className="p-3 flex justify-between items-center bg-white border-2 border-blue-200 rounded-lg hover:border-blue-400 transition-colors">
+                      <span className="text-gray-800 font-medium">
+                        {s.name} x {s.quantity} ({s.minPrice} ~ {s.maxPrice} / {s.unit})
+                      </span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleRemoveService(s.service_id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        ✖ Xóa
+                      </Button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          )}
-
-          {/* Customer Info - Auto-filled and Read-only */}
-          <div className="grid grid-cols-2 gap-2">
-            <Input 
-              placeholder="Tên khách hàng" 
-              value={customerName} 
-              readOnly 
-              className="bg-gray-50 cursor-not-allowed"
-              title="Tự động điền từ hồ sơ người dùng"
-            />
-            <Input 
-              placeholder="Địa chỉ" 
-              value={address} 
-              readOnly 
-              className="bg-gray-50 cursor-not-allowed"
-              title="Tự động điền từ hồ sơ người dùng"
-            />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Input 
-              placeholder="Phone" 
-              value={phone} 
-              readOnly 
-              className="bg-gray-50 cursor-not-allowed"
-              title="Tự động điền từ hồ sơ người dùng"
-            />
-            <Input 
-              placeholder="Email" 
-              value={email} 
-              readOnly 
-              className="bg-gray-50 cursor-not-allowed"
-              title="Tự động điền từ hồ sơ người dùng"
+
+          {/* Notes Section */}
+          <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">5</div>
+              Ghi Chú
+            </h3>
+            <Textarea 
+              placeholder="Nhập ghi chú hoặc yêu cầu đặc biệt..." 
+              value={notes} 
+              onChange={(e) => setNotes(e.target.value)}
+              className="border-2 border-gray-200 focus:border-blue-500 min-h-[100px]"
+              rows={4}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <Input type="number" placeholder="Số lượng khách" value={scale} onChange={(e) => setScale(e.target.value)} />
-            <Input type="date" placeholder="Ngày sự kiện" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
+          {/* Submit Button */}
+          <div className="flex gap-3 pt-4">
+            <Button 
+              type="submit" 
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-lg py-6 font-semibold shadow-lg"
+            >
+              Đặt Booking Ngay
+            </Button>
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              className="px-8 py-6 border-2 border-gray-300 hover:bg-gray-100"
+            >
+              Hủy
+            </Button>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label className="text-sm text-gray-600">Giờ bắt đầu</Label>
-              <Input type="time" placeholder="Giờ bắt đầu" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-            </div>
-            <div>
-              <Label className="text-sm text-gray-600">Giờ kết thúc</Label>
-              <Input type="time" placeholder="Giờ kết thúc" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-            </div>
-          </div>
-
-          {/* Partner Selection - Nhà hàng / Khách sạn */}
-          <div>
-            <Label>Chọn Nhà hàng / Khách sạn</Label>
-            <Select onValueChange={(val) => setPartnerId(val)} value={partnerId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn nhà hàng hoặc khách sạn" />
-              </SelectTrigger>
-              <SelectContent>
-                {partners.map((partner) => (
-                  <SelectItem key={partner._id} value={partner._id}>
-                    {partner.company_name} - {partner.partner_type} ({partner.region})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Select Services */}
-          <div>
-            <Label>Chọn dịch vụ</Label>
-            <Select onValueChange={(val) => handleAddService(val)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Chọn dịch vụ" />
-              </SelectTrigger>
-              <SelectContent>
-                {services.map((sv) => (
-                  <SelectItem key={sv._id} value={sv._id}>
-                    {sv.name} - {sv.minPrice} ~ {sv.maxPrice} / {sv.unit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Selected Services */}
-          {selectedServices.length > 0 && (
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {selectedServices.map((s) => (
-                <div key={s.service_id} className="p-2 flex justify-between items-center bg-gray-50 border rounded">
-                  <span>
-                    {s.name} x {s.quantity} ({s.minPrice} ~ {s.maxPrice} / {s.unit})
-                  </span>
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveService(s.service_id)}>
-                    ✖
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <Textarea placeholder="Ghi chú" value={notes} onChange={(e) => setNotes(e.target.value)} />
-
-          <Button type="submit" className="w-full bg-sky-600 hover:bg-sky-700 text-white">
-            Đặt Booking
-          </Button>
         </form>
       </DialogContent>
     </Dialog>

@@ -32,6 +32,11 @@ export default function ContractsPage() {
   // Contract Detail Dialog State
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState(null);
+  
+  // Payment Dialog State
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [paymentScheduleIndex, setPaymentScheduleIndex] = useState(null);
 
   useEffect(() => {
     fetchContracts();
@@ -78,6 +83,26 @@ export default function ContractsPage() {
       default: return status;
     }
   };
+
+  const handlePayment = (payment, index) => {
+    setSelectedPayment(payment);
+    setPaymentScheduleIndex(index);
+    setPaymentOpen(true);
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount || 0);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('vi-VN');
+  };
+
 
   if (loading) {
     return <div className="p-8 text-center">Đang tải...</div>;
@@ -336,6 +361,7 @@ export default function ContractsPage() {
                             <th className="p-2 border-b text-right">Số tiền</th>
                             <th className="p-2 border-b">Hạn thanh toán</th>
                             <th className="p-2 border-b">Trạng thái</th>
+                            <th className="p-2 border-b text-center">Thao tác</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -351,7 +377,26 @@ export default function ContractsPage() {
                                   : 'N/A'}
                               </td>
                               <td className="p-2">
-                                <Badge variant="outline">{payment.status || 'Chưa thanh toán'}</Badge>
+                                <Badge variant="outline" className={
+                                  payment.status === 'paid' 
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }>
+                                  {payment.status === 'paid' ? 'Đã thanh toán' : 'Chờ thanh toán'}
+                                </Badge>
+                              </td>
+                              <td className="p-2 text-center">
+                                {payment.status !== 'paid' && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="default"
+                                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                                    onClick={() => handlePayment(payment, idx)}
+                                  >
+                                    <CreditCard className="w-4 h-4 mr-1" />
+                                    Thanh toán
+                                  </Button>
+                                )}
                               </td>
                             </tr>
                           ))}
@@ -395,6 +440,132 @@ export default function ContractsPage() {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setDetailOpen(false)}>Đóng</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Info Dialog */}
+        <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                💳 Thông tin thanh toán
+              </DialogTitle>
+              <DialogDescription>
+                Vui lòng thực hiện thanh toán theo thông tin bên dưới
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedPayment && selectedContract && (
+              <div className="space-y-6 py-4">
+                {/* Contract Number */}
+                <div className="text-center pb-4 border-b">
+                  <p className="text-sm text-gray-600">Hợp đồng số</p>
+                  <p className="text-lg font-bold text-gray-900">{selectedContract.contract_number}</p>
+                </div>
+
+                {/* Payment Status Check */}
+                {selectedPayment.status === 'paid' ? (
+                  <div className="bg-green-50 border-2 border-green-500 rounded-lg p-6 text-center">
+                    <div className="text-6xl mb-4">✅</div>
+                    <h2 className="text-2xl font-bold text-green-700 mb-2">Đã thanh toán</h2>
+                    <p className="text-green-600">
+                      Thanh toán đã được xác nhận vào {formatDate(selectedPayment.paid_at)}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Payment Info Cards */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                        <p className="text-sm text-purple-600 font-semibold mb-1">Nội dung thanh toán</p>
+                        <p className="text-base font-bold text-purple-900">{selectedPayment.description}</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                        <p className="text-sm text-blue-600 font-semibold mb-1">Số tiền</p>
+                        <p className="text-xl font-bold text-blue-900">{formatCurrency(selectedPayment.amount)}</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-4 rounded-lg">
+                        <p className="text-sm text-pink-600 font-semibold mb-1">Hạn thanh toán</p>
+                        <p className="text-base font-bold text-pink-900">{formatDate(selectedPayment.deadline)}</p>
+                      </div>
+                      <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg">
+                        <p className="text-sm text-yellow-700 font-semibold mb-1">Trạng thái</p>
+                        <p className="text-base font-bold text-yellow-900">⏳ Chờ thanh toán</p>
+                      </div>
+                    </div>
+
+                    {/* QR Code & Bank Transfer */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* QR Code */}
+                      {selectedPayment.qr_code && (
+                        <div className="bg-gradient-to-br from-purple-100 to-blue-100 p-6 rounded-lg">
+                          <h3 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
+                            📱 Quét mã QR
+                          </h3>
+                          <div className="bg-white p-4 rounded-lg inline-block">
+                            <img 
+                              src={selectedPayment.qr_code} 
+                              alt="QR Code thanh toán"
+                              className="w-48 h-48 object-contain mx-auto"
+                            />
+                          </div>
+                          <p className="text-sm text-purple-700 mt-4">
+                            Sử dụng app ngân hàng để quét mã QR và thanh toán
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Bank Transfer Info */}
+                      <div className="bg-white border-2 border-purple-200 p-6 rounded-lg">
+                        <h3 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
+                          🏦 Thông tin chuyển khoản
+                        </h3>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-sm text-gray-600">Ngân hàng</p>
+                            <p className="font-bold text-gray-900">{process.env.NEXT_PUBLIC_SEPAY_BANK_CODE || 'VCB'} - Vietcombank</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Số tài khoản</p>
+                            <p className="font-bold text-gray-900">{process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NUMBER || '0123456789'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Chủ tài khoản</p>
+                            <p className="font-bold text-gray-900">{process.env.NEXT_PUBLIC_SEPAY_ACCOUNT_NAME || 'CONG TY PLADIVO'}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Số tiền</p>
+                            <p className="font-bold text-2xl text-red-600">{formatCurrency(selectedPayment.amount)}</p>
+                          </div>
+                          <div className="bg-yellow-50 border-2 border-yellow-400 p-4 rounded-lg">
+                            <p className="text-sm text-yellow-800 font-bold mb-2">⚠️ Nội dung chuyển khoản (BẮT BUỘC)</p>
+                            <code className="bg-white px-3 py-2 rounded text-pink-600 font-mono font-bold text-base block">
+                              {selectedPayment.payment_code}
+                            </code>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Important Notes */}
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                      <h4 className="font-bold text-blue-900 mb-2">💡 Lưu ý quan trọng:</h4>
+                      <ul className="list-disc list-inside text-blue-800 space-y-1 text-sm">
+                        <li>Vui lòng nhập <strong>CHÍNH XÁC</strong> nội dung chuyển khoản như trên</li>
+                        <li>Hệ thống sẽ tự động xác nhận thanh toán trong vòng 1-2 phút</li>
+                        <li>Sau khi thanh toán đợt đầu tiên, hợp đồng sẽ được kích hoạt</li>
+                        <li>Nếu có vấn đề, vui lòng liên hệ: {selectedContract.party_b?.phone || '0987654321'}</li>
+                      </ul>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPaymentOpen(false)}>Đóng</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

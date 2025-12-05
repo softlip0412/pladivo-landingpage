@@ -2,626 +2,398 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { 
+  ArrowRight, 
+  Calendar, 
+  Users, 
+  TrendingUp, 
+  CheckCircle,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Award,
+  Target
+} from "lucide-react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ChevronLeft, ChevronRight, Search, Star } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useBookingDialog } from "@/context/BookingDialogContext";
 
-export default function App() {
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [discountedItems, setDiscountedItems] = useState([]);
-  const [activeEventSlide, setActiveEventSlide] = useState(0);
-  const [activePromoSlide, setActivePromoSlide] = useState(0);
-  const [activeServiceSlide, setActiveServiceSlide] = useState(0);
-  const [eventCards, setEventCards] = useState([]);
+const eventShowcase = [
+  {
+    id: 1,
+    title: "Hội nghị & Sự kiện doanh nghiệp",
+    description: "Tổ chức sự kiện chuyên nghiệp cho doanh nghiệp",
+    image: "/events/conference.jpg",
+    stats: "500+ sự kiện"
+  },
+  {
+    id: 2,
+    title: "Sự kiện ca nhạc & Giải trí",
+    description: "Trải nghiệm âm nhạc đỉnh cao",
+    image: "/events/concert.jpg",
+    stats: "300+ concert"
+  },
+  {
+    id: 3,
+    title: "Team Building & Gala Dinner",
+    description: "Kết nối và gắn kết đội ngũ",
+    image: "/events/corporate.jpg",
+    stats: "400+ sự kiện"
+  }
+];
 
-  const router = useRouter();
+const features = [
+  {
+    icon: Calendar,
+    title: "Quản lý dễ dàng",
+    description: "Nền tảng trực quan giúp bạn quản lý mọi khía cạnh của sự kiện"
+  },
+  {
+    icon: Users,
+    title: "Đội ngũ chuyên nghiệp",
+    description: "Đội ngũ có kinh nghiệm sẵn sàng hỗ trợ 24/7"
+  },
+  {
+    icon: TrendingUp,
+    title: "Tối ưu chi phí",
+    description: "Tiết kiệm đến 30% chi phí với các gói dịch vụ của chúng tôi"
+  },
+  {
+    icon: Award,
+    title: "Đáng tin cậy",
+    description: "Được hơn 10,000+ khách hàng tin tưởng và lựa chọn"
+  }
+];
+
+const testimonials = [
+  {
+    id: 1,
+    name: "Nguyễn Văn A",
+    role: "CEO, Tech Corp",
+    content: "Pladivo đã giúp chúng tôi tổ chức hội nghị thường niên một cách hoàn hảo. Chuyên nghiệp và tận tâm!",
+    rating: 5,
+    avatar: "https://ui-avatars.com/api/?name=Nguyen+Van+A&background=0ea5e9&color=fff"
+  },
+  {
+    id: 2,
+    name: "Trần Thị B",
+    role: "Event Manager",
+    content: "Nền tảng rất dễ sử dụng, tiết kiệm thời gian và chi phí cho công ty chúng tôi rất nhiều.",
+    rating: 5,
+    avatar: "https://ui-avatars.com/api/?name=Tran+Thi+B&background=0ea5e9&color=fff"
+  },
+  {
+    id: 3,
+    name: "Lê Văn C",
+    role: "Wedding Planner",
+    content: "Đã tổ chức hơn 50 đám cưới qua Pladivo. Khách hàng luôn hài lòng với dịch vụ!",
+    rating: 5,
+    avatar: "https://ui-avatars.com/api/?name=Le+Van+C&background=0ea5e9&color=fff"
+  }
+];
+
+export default function HomePage() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const { user } = useAuth();
+  const { openBookingDialog } = useBookingDialog();
 
   useEffect(() => {
-    async function fetchDiscounts() {
-      try {
-        const res = await fetch("/api/discounts");
-        if (!res.ok) throw new Error("Failed to fetch discounts");
-        const data = await res.json();
-        setDiscountedItems(data);
-      } catch (err) {
-        console.error("Error loading discounts:", err);
-      }
-    }
-    fetchDiscounts();
-
-    async function fetchEventServices() {
-      try {
-        const res = await fetch("/api/event-services");
-        const data = await res.json();
-
-        const mapped = data.map((es) => {
-          const event = es.event_id;
-          const type = es.event_id?.type_id;
-
-          return {
-            id: es._id,
-            title: event?.title || type?.name,
-            date: new Date(event?.start_datetime).toLocaleDateString("vi-VN"),
-            location: event?.location,
-            price: es.total_price + "₫",
-            rating: 4.5,
-            image: type?.image || "/default.jpg",
-          };
-        });
-
-        setEventCards(mapped);
-      } catch (error) {
-        console.error("Error fetching event services:", error);
-      }
-    }
-    fetchEventServices();
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % eventShowcase.length);
+    }, 5000);
+    return () => clearInterval(timer);
   }, []);
-  // Hàm next/prev slide
-  const handlePrevSlide = () => {
-    setActiveSlide((prev) =>
-      prev === 0 ? discountedItems.length - 1 : prev - 1
-    );
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % eventShowcase.length);
   };
 
-  const handleNextSlide = () => {
-    setActiveSlide((prev) =>
-      prev === discountedItems.length - 1 ? 0 : prev + 1
-    );
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + eventShowcase.length) % eventShowcase.length);
   };
-
-  const promoServices = [
-    {
-      id: 1,
-      title: "Dịch Vụ Ăn Uống Cao Cấp",
-      originalPrice: "50$/người",
-      discountedPrice: "35$/người",
-      discount: "Giảm 30%",
-      rating: 4.9,
-      image:
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=300&h=200&fit=crop",
-    },
-    {
-      id: 2,
-      title: "Chụp Ảnh Sự Kiện",
-      originalPrice: "800$",
-      discountedPrice: "600$",
-      discount: "Giảm 25%",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1452827073306-6e6e661baf57?w=300&h=200&fit=crop",
-    },
-    {
-      id: 3,
-      title: "Thuê Hệ Thống Âm Thanh",
-      originalPrice: "300$/ngày",
-      discountedPrice: "200$/ngày",
-      discount: "Giảm 33%",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=300&h=200&fit=crop",
-    },
-    {
-      id: 4,
-      title: "Trang Trí Địa Điểm",
-      originalPrice: "1200$",
-      discountedPrice: "900$",
-      discount: "Giảm 25%",
-      rating: 4.6,
-      image:
-        "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=300&h=200&fit=crop",
-    },
-    {
-      id: 5,
-      title: "Dịch Vụ DJ",
-      originalPrice: "500$",
-      discountedPrice: "350$",
-      discount: "Giảm 30%",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1571266028243-d220c9d3b323?w=300&h=200&fit=crop",
-    },
-  ];
-
-  const featuredServices = [
-    {
-      id: 1,
-      title: "Tổ Chức Đám Cưới",
-      description: "Dịch vụ tổ chức đám cưới trọn gói",
-      price: "Bắt đầu từ 2000$",
-      rating: 4.9,
-      image:
-        "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=300&h=200&fit=crop",
-    },
-    {
-      id: 2,
-      title: "Sự Kiện Doanh Nghiệp",
-      description: "Quản lý sự kiện doanh nghiệp chuyên nghiệp",
-      price: "Bắt đầu từ 3000$",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=300&h=200&fit=crop",
-    },
-    {
-      id: 3,
-      title: "Tiệc Riêng Tư",
-      description: "Lên kế hoạch tiệc riêng theo yêu cầu",
-      price: "Bắt đầu từ 800$",
-      rating: 4.7,
-      image:
-        "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=300&h=200&fit=crop",
-    },
-    {
-      id: 4,
-      title: "Thuê Thiết Bị",
-      description: "Thiết bị âm thanh/hình ảnh chuyên nghiệp",
-      price: "Bắt đầu từ 150$/ngày",
-      rating: 4.6,
-      image:
-        "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=300&h=200&fit=crop",
-    },
-    {
-      id: 5,
-      title: "Đặt Địa Điểm",
-      description: "Dịch vụ đặt địa điểm cao cấp",
-      price: "Bắt đầu từ 500$",
-      rating: 4.8,
-      image:
-        "https://images.unsplash.com/photo-1511578314322-379afb476865?w=300&h=200&fit=crop",
-    },
-  ];
-
-  const partners = [
-    {
-      id: 1,
-      name: "Sự Kiện Pro",
-      logo: "https://via.placeholder.com/150x80/e0f2fe/0369a1?text=EventPro",
-    },
-    {
-      id: 2,
-      name: "Địa Điểm Max",
-      logo: "https://via.placeholder.com/150x80/e0f2fe/0369a1?text=VenueMax",
-    },
-    {
-      id: 3,
-      name: "Catering Plus",
-      logo: "https://via.placeholder.com/150x80/e0f2fe/0369a1?text=CaterPlus",
-    },
-    {
-      id: 4,
-      name: "Studio Ảnh",
-      logo: "https://via.placeholder.com/150x80/e0f2fe/0369a1?text=PhotoStudio",
-    },
-    {
-      id: 5,
-      name: "Công Nghệ Âm Thanh",
-      logo: "https://via.placeholder.com/150x80/e0f2fe/0369a1?text=SoundTech",
-    },
-    {
-      id: 6,
-      name: "Trang Trí Decor",
-      logo: "https://via.placeholder.com/150x80/e0f2fe/0369a1?text=DecorArt",
-    },
-  ];
-
-  const eventCategories = ["Buổi hòa nhạc", "Hội nghị", "Hội thảo", "Thể thao"];
-  const serviceCategories = [
-    "Ăn uống",
-    "Chụp ảnh",
-    "Địa điểm",
-    "Thuê thiết bị",
-  ];
-
-  const nextSlide = (current, max, setter) => {
-    setter(current === max - 1 ? 0 : current + 1);
-  };
-
-  const prevSlide = (current, max, setter) => {
-    setter(current === 0 ? max - 1 : current - 1);
-  };
-
-  const CardSlider = ({ items, activeSlide, setActiveSlide, renderCard }) => (
-    <div className="relative">
-      <div className="flex gap-4 overflow-hidden">
-        <div
-          className="flex transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${activeSlide * 320}px)` }}
-        >
-          {items.map(renderCard)}
-        </div>
-      </div>
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white hover:bg-gray-50"
-        onClick={() => prevSlide(activeSlide, items.length, setActiveSlide)}
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white hover:bg-gray-50"
-        onClick={() => nextSlide(activeSlide, items.length, setActiveSlide)}
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
+      {/* Header Component */}
       <Header activePage="home" />
 
-      <main>
-        {/* Section 1: Split Layout */}
-        <section className="py-16 relative overflow-hidden">
-          {/* Background Image */}
-          <div
-            className="absolute inset-0 bg-center bg-no-repeat bg-cover rounded-b-3xl overflow-hidden"
-            style={{
-              backgroundImage: `url('/background.jpg')`,
-            }}
-          />
-
-          {/* Overlay for better readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-50/50 to-blue-50/50" />
-
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-8 items-start">
-              {/* Left: Search Card */}
-              <Card className="p-6 shadow-lg h-full">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-gray-800 mb-4">
-                    Tìm kiếm sự kiện & dịch vụ
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="events" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-6">
-                      <TabsTrigger
-                        value="events"
-                        className="data-[state=active]:bg-sky-600 data-[state=active]:text-white"
-                      >
-                        Sự kiện
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="services"
-                        className="data-[state=active]:bg-sky-600 data-[state=active]:text-white"
-                      >
-                        Dịch vụ
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <div className="relative mb-6">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        placeholder="Search events or services..."
-                        className="pl-10"
-                      />
-                    </div>
-
-                    <TabsContent value="events">
-                      <div className="space-y-3">
-                        <h3 className="font-semibold text-gray-700 mb-3">
-                          Phân loại sự kiện
-                        </h3>
-                        {eventCategories.map((category, index) => (
-                          <button
-                            key={index}
-                            className="w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-sky-100 hover:text-sky-700 transition-colors"
-                            onClick={() =>
-                              console.log(
-                                `API Call: GET /api/events?category=${category}`
-                              )
-                            }
-                          >
-                            {category}
-                          </button>
-                        ))}
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="services">
-                      <div className="space-y-3">
-                        <h3 className="font-semibold text-gray-700 mb-3">
-                          Phân loại dịch
-                        </h3>
-                        {serviceCategories.map((category, index) => (
-                          <button
-                            key={index}
-                            className="w-full text-left p-3 rounded-lg bg-gray-50 hover:bg-sky-100 hover:text-sky-700 transition-colors"
-                            onClick={() =>
-                              console.log(
-                                `API Call: GET /api/services?category=${category}`
-                              )
-                            }
-                          >
-                            {category}
-                          </button>
-                        ))}
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-
-              {/* Right: Special Offers Card */}
-              <Card className="shadow-lg h-full overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-gray-800 mb-4">
-                    Khuyến Mại
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <CardSlider
-                    items={promoServices}
-                    activeSlide={activePromoSlide}
-                    setActiveSlide={setActivePromoSlide}
-                    renderCard={(service) => (
-                      <div
-                        key={service.id}
-                        className="w-full flex-shrink-0 px-6 pb-6"
-                      >
-                        <div className="relative mb-4">
-                          <img
-                            src={service.image}
-                            alt={service.title}
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
-                          <div className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                            {service.discount}
-                          </div>
-                        </div>
-                        <h3 className="font-bold text-xl mb-2">
-                          {service.title}
-                        </h3>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-gray-500 line-through">
-                            {service.originalPrice}
-                          </span>
-                          <span className="text-xl font-bold text-red-600">
-                            {service.discountedPrice}
-                          </span>
-                        </div>
-                        <div className="flex items-center mb-4">
-                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                          <span className="ml-1 text-sm">{service.rating}</span>
-                        </div>
-                        <Button className="w-full bg-sky-600 hover:bg-sky-700">
-                          Đặt Ngay
-                        </Button>
-                      </div>
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 2: Discounted Items (Carousel) */}
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Ưu đãi đặc biệt
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Khám phá các ưu đãi tốt nhất cho sự kiện của bạn
+      {/* Hero Section */}
+      <section className="pt-24 pb-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm font-medium">Nền tảng quản lý sự kiện #1 Việt Nam</span>
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                Biến sự kiện của bạn thành
+                <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"> hiện thực</span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                Quản lý mọi khía cạnh của sự kiện từ lập kế hoạch đến thực hiện. 
+                Tiết kiệm thời gian, tối ưu chi phí, tạo trải nghiệm đáng nhớ.
               </p>
-            </div>
 
-            {discountedItems.length > 0 ? (
-              <CardSlider
-                items={discountedItems}
-                activeSlide={activeSlide}
-                setActiveSlide={setActiveSlide}
-                renderCard={(item) => (
-                  <Card
-                    key={item._id}
-                    className="w-72 flex-shrink-0 overflow-hidden hover:shadow-lg transition-shadow"
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+                {user ? (
+                  <Button 
+                    size="lg" 
+                    className="bg-blue-600 hover:bg-blue-700 text-lg px-8"
+                    onClick={openBookingDialog}
                   >
-                    <div className="relative">
-                      <img
-                        src={item.image || "/default-discount.jpg"}
-                        alt={item.title}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
-                        -{item.percentage}%
-                      </div>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {item.description}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">
-                          Hết hạn:{" "}
-                          {new Date(item.valid_until).toLocaleDateString(
-                            "vi-VN"
-                          )}
-                        </span>
-                        <Button
-                          size="sm"
-                          className="bg-sky-600 hover:bg-sky-700"
-                        >
-                          Chi tiết
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    Tạo sự kiện ngay
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                ) : (
+                  <Link href="/signup">
+                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8">
+                      Tạo sự kiện ngay
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
                 )}
-              />
-            ) : (
-              <p className="text-center text-gray-500">
-                Không có ưu đãi nào hiện tại.
-              </p>
-            )}
-          </div>
-        </section>
+                <Link href="#events">
+                  <Button size="lg" variant="outline" className="text-lg px-8">
+                    Khám phá thêm
+                  </Button>
+                </Link>
+              </div>
 
-        {/* Section 3: Event Cards from API */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Sự kiện sắp diễn ra
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Đừng bỏ lỡ những sự kiện hấp dẫn nhất
-              </p>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-6">
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">1.5K+</div>
+                  <div className="text-sm text-gray-600">Sự kiện</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">10K+</div>
+                  <div className="text-sm text-gray-600">Khách hàng</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">98%</div>
+                  <div className="text-sm text-gray-600">Hài lòng</div>
+                </div>
+              </div>
             </div>
 
-            {eventCards.length > 0 ? (
-              <CardSlider
-                items={eventCards}
-                activeSlide={activeEventSlide}
-                setActiveSlide={setActiveEventSlide}
-                renderCard={(card) => (
-                  <Card
-                    key={card.id}
-                    className="w-72 flex-shrink-0 overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <div className="relative">
-                      <img
-                        src={card.image}
-                        alt={card.title}
-                        className="w-full h-48 object-cover"
-                      />
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-bold text-lg mb-2">{card.title}</h3>
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-gray-600">
-                          <span className="mr-2">📅</span>
-                          {card.date}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <span className="mr-2">📍</span>
-                          {card.location}
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-sky-600">
-                          {card.price}
-                        </span>
-                        <Button
-                          size="sm"
-                          className="bg-sky-600 hover:bg-sky-700"
-                        >
-                          Đặt vé
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              />
-            ) : (
-              <p className="text-center text-gray-500">Đang tải sự kiện...</p>
-            )}
-          </div>
-        </section>
-
-        {/* Section 4: Service List */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Dịch vụ nổi bật
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Dịch vụ chuyên nghiệp để khiến sự kiện của bạn trở nên đáng nhớ
-              </p>
-            </div>
-
-            <CardSlider
-              items={featuredServices}
-              activeSlide={activeServiceSlide}
-              setActiveSlide={setActiveServiceSlide}
-              renderCard={(service) => (
-                <Card
-                  key={service.id}
-                  className="w-72 flex-shrink-0 overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <div className="relative">
-                    <img
-                      src={service.image}
-                      alt={service.title}
-                      className="w-full h-48 object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-bold text-lg mb-2">{service.title}</h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      {service.description}
-                    </p>
-                    <div className="mb-3">
-                      <span className="text-lg font-bold text-sky-600">
-                        {service.price}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 text-sm">{service.rating}</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        className="bg-sky-600 hover:bg-sky-700"
-                        onClick={() =>
-                          console.log(
-                            `API Call: GET /api/services/${service.id} - View service details`
-                          )
-                        }
-                      >
-                        Đọc thêm
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            />
-          </div>
-        </section>
-
-        {/* Section 5: Partners */}
-        <section className="py-16 bg-sky-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Đối tác của chúng tôi
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Được các doanh nghiệp hàng đầu trong ngành sự kiện tin tưởng
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
-              {partners.map((partner) => (
+            {/* Right Image Carousel */}
+            <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl">
+              {eventShowcase.map((event, index) => (
                 <div
-                  key={partner.id}
-                  className="flex justify-center items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                  key={event.id}
+                  className={`absolute inset-0 transition-opacity duration-1000 ${
+                    index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  }`}
                 >
-                  <img
-                    src={partner.logo}
-                    alt={partner.name}
-                    className="max-w-full h-12 object-contain opacity-70 hover:opacity-100 transition-opacity"
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-900/40 to-transparent z-10" />
+                  <div 
+                    className="h-full w-full bg-cover bg-center"
+                    style={{ 
+                      backgroundImage: `url(${event.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
+                    }}
                   />
+                  <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
+                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
+                      <h3 className="text-2xl font-bold text-white mb-2">{event.title}</h3>
+                      <p className="text-blue-100 mb-3">{event.description}</p>
+                      <div className="text-sm text-blue-200">{event.stats}</div>
+                    </div>
+                  </div>
                 </div>
               ))}
+
+              {/* Navigation */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/30 backdrop-blur-sm p-3 rounded-full transition-all"
+              >
+                <ChevronLeft className="h-6 w-6 text-white" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-white/20 hover:bg-white/30 backdrop-blur-sm p-3 rounded-full transition-all"
+              >
+                <ChevronRight className="h-6 w-6 text-white" />
+              </button>
+
+              {/* Dots */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+                {eventShowcase.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      {/* Footer */}
+      {/* Features Section */}
+      <section id="features" className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Tại sao chọn Pladivo?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Chúng tôi cung cấp mọi thứ bạn cần để tổ chức sự kiện thành công
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all">
+                <CardContent className="p-6">
+                  <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <feature.icon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Event Types Section */}
+      <section id="events" className="py-20 bg-gradient-to-br from-blue-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Các loại sự kiện chúng tôi phục vụ
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Từ hội nghị doanh nghiệp đến tiệc cưới, chúng tôi có kinh nghiệm với mọi loại sự kiện
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {eventShowcase.map((event) => (
+              <Card key={event.id} className="overflow-hidden hover:shadow-xl transition-all group">
+                <div className="relative h-64">
+                  <div 
+                    className="h-full w-full bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
+                    style={{ 
+                      backgroundImage: `url(${event.image})`,
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
+                    <p className="text-blue-100 text-sm mb-2">{event.description}</p>
+                    <div className="text-xs text-blue-200">{event.stats}</div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Khách hàng nói gì về chúng tôi
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Hơn 10,000+ khách hàng hài lòng với dịch vụ của Pladivo
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="relative">
+              {testimonials.map((testimonial, index) => (
+                <div
+                  key={testimonial.id}
+                  className={`transition-opacity duration-500 ${
+                    index === currentTestimonial ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                  }`}
+                >
+                  <Card className="border-2 border-blue-100">
+                    <CardContent className="p-8">
+                      <div className="flex gap-1 mb-4">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                        ))}
+                      </div>
+                      <p className="text-xl text-gray-700 mb-6 italic">
+                        "{testimonial.content}"
+                      </p>
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={testimonial.avatar} 
+                          alt={testimonial.name}
+                          className="w-12 h-12 rounded-full"
+                        />
+                        <div>
+                          <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                          <div className="text-sm text-gray-600">{testimonial.role}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+
+              {/* Navigation Dots */}
+              <div className="flex justify-center gap-2 mt-8">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTestimonial(index)}
+                    className={`h-2 rounded-full transition-all ${
+                      index === currentTestimonial ? 'w-8 bg-blue-600' : 'w-2 bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Sẵn sàng tạo sự kiện đáng nhớ?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Tham gia cùng hàng ngàn khách hàng đã tin tưởng Pladivo để tổ chức sự kiện của họ
+          </p>
+          <Link href="/signup">
+            <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8">
+              Bắt đầu miễn phí ngay
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer Component */}
       <Footer />
     </div>
   );

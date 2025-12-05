@@ -27,10 +27,23 @@ export async function POST(request) {
     return Response.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Validate username format
+  if (username.length < 3 || username.length > 20) {
+    return Response.json({ error: "Username phải có từ 3-20 ký tự" }, { status: 400 });
+  }
+
+  // Username can only contain letters, numbers, underscore, and dash
+  const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+  if (!usernameRegex.test(username)) {
+    return Response.json({ 
+      error: "Username chỉ được chứa chữ cái, số, gạch dưới (_) và gạch ngang (-)" 
+    }, { status: 400 });
+  }
+
   // Check if username is taken (if changed)
   const existingUser = await User.findOne({ username, _id: { $ne: decoded.user_id } });
   if (existingUser) {
-    return Response.json({ error: "Username already taken" }, { status: 400 });
+    return Response.json({ error: "Username đã được sử dụng" }, { status: 400 });
   }
 
   // Update User

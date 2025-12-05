@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Star, Search, Filter, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
@@ -90,12 +91,12 @@ export default function ServicesPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-r from-sky-50 to-blue-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-6">
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">
               Dịch vụ Sự kiện Chuyên nghiệp
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Tìm các nhà cung cấp dịch vụ uy tín cho tiệc, nhiếp ảnh, địa điểm,
               cho thuê thiết bị và nhiều dịch vụ khác.
             </p>
@@ -144,7 +145,7 @@ export default function ServicesPage() {
 
               <Button
                 onClick={filterServices}
-                className="bg-sky-600 hover:bg-sky-700"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 <Filter className="h-4 w-4 mr-2" />
                 Áp dụng Bộ lọc
@@ -188,7 +189,7 @@ export default function ServicesPage() {
                     setSearchTerm("");
                     setSelectedCategory("all");
                   }}
-                  className="mt-4 bg-sky-600 hover:bg-sky-700"
+                  className="mt-4 bg-blue-600 hover:bg-blue-700"
                 >
                   Xóa bộ lọc
                 </Button>
@@ -198,7 +199,7 @@ export default function ServicesPage() {
                 {filteredServices.map((service) => (
                   <Card
                     key={service.id}
-                    className="overflow-hidden hover:shadow-lg transition-shadow"
+                    className="overflow-hidden border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all hover:scale-105"
                   >
                     <div className="relative">
                       <img
@@ -256,12 +257,12 @@ export default function ServicesPage() {
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <div className="text-lg font-bold text-sky-600">
+                        <div className="text-lg font-bold text-blue-600">
                           {service.price}
                         </div>
                         <Button
                           onClick={() => handleBooking(service.id)}
-                          className="bg-sky-600 hover:bg-sky-700"
+                          className="bg-blue-600 hover:bg-blue-700"
                         >
                           Đặt dịch vụ
                         </Button>
@@ -275,21 +276,21 @@ export default function ServicesPage() {
         </section>
 
         {/* Service Categories Overview */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 to-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 text-center mb-16">
               Các loại dịch vụ
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               <Card
-                className="text-center hover:shadow-lg transition-shadow cursor-pointer"
+                className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer"
                 onClick={() => setSelectedCategory("Catering")}
               >
-                <CardContent className="pt-8">
-                  <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CardContent className="pt-8 pb-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">🍽️</span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Catering</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Catering</h3>
                   <p className="text-gray-600 text-sm">
                     Dịch vụ ẩm thực chuyên nghiệp cho mọi loại sự kiện
                   </p>
@@ -297,14 +298,14 @@ export default function ServicesPage() {
               </Card>
 
               <Card
-                className="text-center hover:shadow-lg transition-shadow cursor-pointer"
+                className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer"
                 onClick={() => setSelectedCategory("Photography")}
               >
-                <CardContent className="pt-8">
-                  <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CardContent className="pt-8 pb-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">📸</span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Nhiếp ảnh</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Nhiếp ảnh</h3>
                   <p className="text-gray-600 text-sm">
                     Ghi lại những khoảnh khắc đặc biệt của bạn một cách chuyên
                     nghiệp
@@ -313,14 +314,14 @@ export default function ServicesPage() {
               </Card>
 
               <Card
-                className="text-center hover:shadow-lg transition-shadow cursor-pointer"
+                className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer"
                 onClick={() => setSelectedCategory("Venues")}
               >
-                <CardContent className="pt-8">
-                  <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CardContent className="pt-8 pb-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">🏛️</span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Venues</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Venues</h3>
                   <p className="text-gray-600 text-sm">
                     Những địa điểm tuyệt đẹp cho những sự kiện đáng nhớ
                   </p>
@@ -328,14 +329,14 @@ export default function ServicesPage() {
               </Card>
 
               <Card
-                className="text-center hover:shadow-lg transition-shadow cursor-pointer"
+                className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer"
                 onClick={() => setSelectedCategory("Equipment Rental")}
               >
-                <CardContent className="pt-8">
-                  <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CardContent className="pt-8 pb-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">🎵</span>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Thiết bị</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Thiết bị</h3>
                   <p className="text-gray-600 text-sm">
                     Thuê thiết bị âm thanh, hình ảnh và kỹ thuật
                   </p>
@@ -346,87 +347,8 @@ export default function ServicesPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
-            <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-sky-400 mb-4">Pladivo</h3>
-              <p className="text-gray-300 mb-4">
-                Điểm đến hàng đầu của bạn cho việc đặt sự kiện và dịch vụ chuyên
-                nghiệp. Giúp những khoảnh khắc đáng nhớ trở nên dễ dàng.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Help</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Hỗ trợ Khách hàng
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    FAQ
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Kết nối
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Giới thiệu
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Cơ hội Nghề nghiệp
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Báo chí / Truyền thông
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Liên kết nhanh</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Sự kiện
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Dịch vụ
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-sky-400 transition-colors">
-                    Đối tác
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2024 Pladivo. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Footer Component */}
+      <Footer />
     </div>
   );
 }

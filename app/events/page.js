@@ -5,22 +5,27 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar, MapPin, Star, Search, Filter } from 'lucide-react'
+import { Calendar, MapPin, Search, Filter, Ticket, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import { Badge } from '@/components/ui/badge'
+import TicketBookingDialog from '@/components/TicketBookingDialog'
 
 export default function EventsPage() {
   const [events, setEvents] = useState([])
   const [filteredEvents, setFilteredEvents] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedFilter, setSelectedFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  
+  // Booking dialog state
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
-  const categories = [
-    { value: 'all', label: 'Tất cả thể loại' },
-    { value: 'Concerts', label: 'Hòa nhạc' },
-    { value: 'Conferences', label: 'Hội thảo' },
-    { value: 'Workshops', label: 'Workshop' },
-    { value: 'Sports', label: 'Thể thao' }
+  const filterOptions = [
+    { value: 'all', label: 'Tất cả sự kiện' },
+    { value: 'on-sale', label: 'Đang bán vé' },
+    { value: 'upcoming', label: 'Sắp mở bán' }
   ]
 
   useEffect(() => {
@@ -29,7 +34,7 @@ export default function EventsPage() {
 
   useEffect(() => {
     filterEvents()
-  }, [events, searchTerm, selectedCategory])
+  }, [events, searchTerm, selectedFilter])
 
   const fetchEvents = async () => {
     try {
@@ -48,25 +53,49 @@ export default function EventsPage() {
   const filterEvents = () => {
     let filtered = [...events]
 
-    // Lọc theo thể loại
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(event => event.category === selectedCategory)
+    // Lọc theo trạng thái bán vé
+    if (selectedFilter === 'on-sale') {
+      filtered = filtered.filter(event => event.ticketSaleStatus.hasTicketsOnSale)
+    } else if (selectedFilter === 'upcoming') {
+      filtered = filtered.filter(event => 
+        !event.ticketSaleStatus.hasTicketsOnSale && event.ticketSaleStatus.upcoming.length > 0
+      )
     }
 
     // Lọc theo từ khóa tìm kiếm
     if (searchTerm) {
       filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.location.toLowerCase().includes(searchTerm.toLowerCase())
+        event.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.event_type?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
     setFilteredEvents(filtered)
   }
 
-  const handleBooking = (eventId) => {
-    window.location.href = `/booking?eventId=${eventId}`
+  const handleBooking = (event) => {
+    setSelectedEvent(event)
+    setBookingDialogOpen(true)
+  }
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const formatDateTime = (dateString) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   return (
@@ -76,11 +105,11 @@ export default function EventsPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-r from-sky-50 to-blue-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-6">Khám phá các sự kiện tuyệt vời</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-              Tìm và đặt vé cho hòa nhạc, hội thảo, workshop, thể thao và nhiều hơn nữa.
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">Khám phá các sự kiện tuyệt vời</h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Tìm và đặt vé cho các sự kiện đại chúng đang mở bán và sắp diễn ra.
             </p>
           </div>
         </section>
@@ -94,7 +123,7 @@ export default function EventsPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input 
-                    placeholder="Tìm theo tên, địa điểm hoặc mô tả..." 
+                    placeholder="Tìm theo tên, địa điểm..." 
                     className="pl-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -103,22 +132,22 @@ export default function EventsPage() {
               </div>
               
               <div className="w-full md:w-64">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Thể loại</label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
+                <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn thể loại" />
+                    <SelectValue placeholder="Chọn trạng thái" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
+                    {filterOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
-              <Button onClick={filterEvents} className="bg-sky-600 hover:bg-sky-700">
+              <Button onClick={filterEvents} className="bg-blue-600 hover:bg-blue-700">
                 <Filter className="h-4 w-4 mr-2" />
                 Áp dụng bộ lọc
               </Button>
@@ -133,17 +162,6 @@ export default function EventsPage() {
               <h2 className="text-2xl font-bold text-gray-800">
                 {filteredEvents.length} sự kiện được tìm thấy
               </h2>
-              <Select defaultValue="date">
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sắp xếp theo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date">Ngày tổ chức</SelectItem>
-                  <SelectItem value="price-low">Giá: Thấp đến cao</SelectItem>
-                  <SelectItem value="price-high">Giá: Cao đến thấp</SelectItem>
-                  <SelectItem value="rating">Đánh giá cao nhất</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {loading ? (
@@ -157,9 +175,9 @@ export default function EventsPage() {
                 <Button 
                   onClick={() => {
                     setSearchTerm('')
-                    setSelectedCategory('all')
+                    setSelectedFilter('all')
                   }}
-                  className="mt-4 bg-sky-600 hover:bg-sky-700"
+                  className="mt-4 bg-blue-600 hover:bg-blue-700"
                 >
                   Xóa bộ lọc
                 </Button>
@@ -167,56 +185,131 @@ export default function EventsPage() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredEvents.map((event) => (
-                  <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <Card key={event.id} className="overflow-hidden border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all hover:scale-105">
                     <div className="relative">
-                      <img 
-                        src={`https://images.unsplash.com/photo-${event.id === 1 ? '1493225457124-a3eb161ffa5f' : 
-                             event.id === 2 ? '1540575467063-178a50c2df87' :
-                             event.id === 3 ? '1452860606245-08befc0ff44b' :
-                             '1571019613454-1cb2f99b2d8b'}?w=400&h=250&fit=crop`}
-                        alt={event.title}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="absolute top-4 left-4 bg-sky-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                        {event.price}₫
+                      {/* Background with theme color if available */}
+                      <div 
+                        className="w-full h-48 flex items-center justify-center"
+                        style={{
+                          background: event.eventPlan?.mainColor 
+                            ? `linear-gradient(135deg, ${event.eventPlan.mainColor} 0%, ${event.eventPlan.mainColor}dd 100%)`
+                            : 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
+                        }}
+                      >
+                        <Ticket className="h-24 w-24 text-white opacity-50" />
                       </div>
-                      <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                        {event.category}
-                      </div>
+                      
+                      {/* Status Badge */}
+                      {event.ticketSaleStatus.hasTicketsOnSale ? (
+                        <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg flex items-center gap-1">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Đang bán vé
+                        </div>
+                      ) : event.ticketSaleStatus.upcoming.length > 0 ? (
+                        <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          Sắp mở bán
+                        </div>
+                      ) : null}
                     </div>
+                    
                     <CardContent className="p-6">
-                      <h3 className="font-bold text-xl mb-2">{event.title}</h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{event.description}</p>
+                      <div className="mb-2 flex flex-wrap gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {event.event_type}
+                        </Badge>
+                        {event.eventPlan?.eventCategory && (
+                          <Badge variant="secondary" className="text-xs">
+                            {event.eventPlan.eventCategory}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <h3 className="font-bold text-xl mb-2">{event.customer_name}</h3>
+                      
+                      {/* Event Plan Theme/Goal */}
+                      {event.eventPlan?.theme && (
+                        <p className="text-sm text-gray-600 mb-2 italic">
+                          "{event.eventPlan.theme}"
+                        </p>
+                      )}
+                      
+                      {event.eventPlan?.goal && (
+                        <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+                          🎯 {event.eventPlan.goal}
+                        </p>
+                      )}
                       
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center text-gray-600 text-sm">
                           <Calendar className="h-4 w-4 mr-2" />
-                          {new Date(event.date).toLocaleDateString('vi-VN', {
-                            weekday: 'short',
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                          {formatDate(event.event_date)}
+                          {event.event_time && ` - ${event.event_time}`}
                         </div>
                         <div className="flex items-center text-gray-600 text-sm">
                           <MapPin className="h-4 w-4 mr-2" />
-                          {event.location}
+                          {event.address}
                         </div>
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <Star className="h-4 w-4 mr-2 text-yellow-400 fill-current" />
-                          {event.rating} ({event.availableTickets} vé còn lại)
-                        </div>
+                        
+                        {/* Event Plan Additional Info */}
+                        {event.eventPlan?.partner && (
+                          <div className="text-xs text-gray-500">
+                            🤝 Đối tác: {event.eventPlan.partner.name}
+                          </div>
+                        )}
+                        
+                        {event.eventPlan?.audience && (
+                          <div className="text-xs text-gray-500">
+                            👥 Đối tượng: {event.eventPlan.audience}
+                          </div>
+                        )}
+                        
+                        {event.eventPlan?.style && (
+                          <div className="text-xs text-gray-500">
+                            🎨 Phong cách: {event.eventPlan.style}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Ticket Sale Info */}
+                      <div className="mb-4 space-y-2">
+                        {event.ticketSaleStatus.onSale.length > 0 && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <p className="text-xs font-semibold text-green-800 mb-1">Đang bán:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {event.ticketSaleStatus.onSale.map((ticket, idx) => (
+                                <Badge key={idx} className="bg-green-600 text-white text-xs">
+                                  {ticket.ticket_type}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {event.ticketSaleStatus.upcoming.length > 0 && (
+                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                            <p className="text-xs font-semibold text-orange-800 mb-1">Sắp mở bán:</p>
+                            {event.ticketSaleStatus.upcoming.map((ticket, idx) => (
+                              <div key={idx} className="text-xs text-orange-700 mb-1">
+                                <span className="font-medium">{ticket.ticket_type}</span>
+                                <span className="text-orange-600"> - Mở bán: {formatDate(ticket.sale_start_date)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <div className="text-2xl font-bold text-sky-600">
-                          {event.price}₫
+                        <div className="text-sm text-gray-500">
+                          {event.ticketSaleStatus.onSale.length + event.ticketSaleStatus.upcoming.length} loại vé
                         </div>
                         <Button 
-                          onClick={() => handleBooking(event.id)}
-                          className="bg-sky-600 hover:bg-sky-700"
-                        >
-                          Đặt vé
+                          onClick={() => handleBooking(event)}
+                          disabled={!event.ticketSaleStatus.hasTicketsOnSale}
+                          className={event.ticketSaleStatus.hasTicketsOnSale 
+                            ? "bg-blue-600 hover:bg-blue-700" 
+                            : "bg-gray-400 cursor-not-allowed"}>
+                          {event.ticketSaleStatus.hasTicketsOnSale ? 'Đặt vé' : 'Chưa mở bán'}
                         </Button>
                       </div>
                     </CardContent>
@@ -228,51 +321,15 @@ export default function EventsPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
-            <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-sky-400 mb-4">Pladivo</h3>
-              <p className="text-gray-300 mb-4">
-                Điểm đến hàng đầu của bạn cho việc đặt sự kiện và dịch vụ chuyên nghiệp.  
-                Giúp bạn tạo nên những khoảnh khắc đáng nhớ một cách dễ dàng.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Hỗ trợ</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Trung tâm hỗ trợ</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Câu hỏi thường gặp</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Liên hệ</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Công ty</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="/about" className="hover:text-sky-400 transition-colors">Về chúng tôi</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Tuyển dụng</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Báo chí</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Liên kết nhanh</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="/events" className="hover:text-sky-400 transition-colors">Sự kiện</a></li>
-                <li><a href="/services" className="hover:text-sky-400 transition-colors">Dịch vụ</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Đối tác</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2024 Pladivo. Bản quyền thuộc về công ty.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Ticket Booking Dialog */}
+      <TicketBookingDialog 
+        event={selectedEvent}
+        open={bookingDialogOpen}
+        onOpenChange={setBookingDialogOpen}
+      />
+
+      {/* Footer Component */}
+      <Footer />
     </div>
   )
 }

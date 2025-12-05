@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { BookingDialogProvider } from "@/context/BookingDialogContext";
 import { Toaster } from "sonner";
 import Chatbot from "@/components/shared/chat-bot";
 
@@ -15,7 +16,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <BookingDialogProvider>
+            {children}
+          </BookingDialogProvider>
+        </AuthProvider>
         <Toaster position="top-right" richColors />
         <Chatbot />
       </body>

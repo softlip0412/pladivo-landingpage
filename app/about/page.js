@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Users, Target, Award, Heart } from 'lucide-react'
 import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 export default function AboutPage() {
   return (
@@ -12,10 +13,10 @@ export default function AboutPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-r from-sky-50 to-blue-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-6">Về Pladivo</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">Về Pladivo</h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Điểm đến hàng đầu của bạn cho việc đặt sự kiện và dịch vụ chuyên nghiệp. 
               Chúng tôi kết nối mọi người với những trải nghiệm tuyệt vời và giúp tạo nên những khoảnh khắc đáng nhớ thật dễ dàng.
             </p>
@@ -23,17 +24,17 @@ export default function AboutPage() {
         </section>
 
         {/* Mission & Vision */}
-        <section className="py-16 bg-white">
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">Sứ mệnh của chúng tôi</h2>
-                <p className="text-gray-600 mb-6">
+                <h2 className="text-4xl font-bold text-gray-900 mb-6">Sứ mệnh của chúng tôi</h2>
+                <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                   Cách mạng hóa ngành tổ chức sự kiện bằng cách cung cấp một nền tảng liền mạch, kết nối 
                   nhà tổ chức, nhà cung cấp dịch vụ và người tham dự. Chúng tôi tin rằng mọi sự kiện đều nên 
                   đặc biệt và không căng thẳng.
                 </p>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-lg leading-relaxed">
                   Nền tảng của chúng tôi đơn giản hóa quá trình lập kế hoạch sự kiện phức tạp, giúp mọi người đều có thể tiếp cận, 
                   từ cá nhân tổ chức tiệc đến các nhà quản lý sự kiện doanh nghiệp.
                 </p>
@@ -42,7 +43,7 @@ export default function AboutPage() {
                 <img 
                   src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=500&h=400&fit=crop" 
                   alt="Sứ mệnh"
-                  className="rounded-lg shadow-lg w-full h-80 object-cover"
+                  className="rounded-2xl shadow-2xl w-full h-80 object-cover hover:scale-105 transition-transform duration-300"
                 />
               </div>
             </div>
@@ -50,44 +51,52 @@ export default function AboutPage() {
         </section>
 
         {/* Values */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 to-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">Giá trị cốt lõi</h2>
+            <h2 className="text-4xl font-bold text-gray-900 text-center mb-16">Giá trị cốt lõi</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <Users className="w-12 h-12 text-sky-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Cộng đồng</h3>
+              <Card className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all">
+                <CardContent className="pt-8 pb-6">
+                  <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Cộng đồng</h3>
                   <p className="text-gray-600">
                     Kết nối mọi người và tạo ra những mối quan hệ bền vững thông qua các trải nghiệm chung.
                   </p>
                 </CardContent>
               </Card>
               
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <Target className="w-12 h-12 text-sky-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Xuất sắc</h3>
+              <Card className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all">
+                <CardContent className="pt-8 pb-6">
+                  <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Target className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Xuất sắc</h3>
                   <p className="text-gray-600">
                     Cam kết mang đến dịch vụ chất lượng cao nhất và vượt qua kỳ vọng trong mọi trải nghiệm.
                   </p>
                 </CardContent>
               </Card>
               
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <Award className="w-12 h-12 text-sky-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Đổi mới</h3>
+              <Card className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all">
+                <CardContent className="pt-8 pb-6">
+                  <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Award className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Đổi mới</h3>
                   <p className="text-gray-600">
                     Không ngừng cải tiến nền tảng với công nghệ tiên tiến và các giải pháp sáng tạo.
                   </p>
                 </CardContent>
               </Card>
               
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <Heart className="w-12 h-12 text-sky-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Đam mê</h3>
+              <Card className="text-center border-2 border-gray-100 hover:border-blue-200 hover:shadow-xl transition-all">
+                <CardContent className="pt-8 pb-6">
+                  <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Heart className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Đam mê</h3>
                   <p className="text-gray-600">
                     Chúng tôi yêu công việc mình làm và điều đó thể hiện trong mọi sự kiện mà chúng tôi góp phần tạo nên.
                   </p>
@@ -98,49 +107,49 @@ export default function AboutPage() {
         </section>
 
         {/* Team Section */}
-        <section className="py-16 bg-white">
+        <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-gray-800 text-center mb-12">Đội ngũ của chúng tôi</h2>
+            <h2 className="text-4xl font-bold text-gray-900 text-center mb-16">Đội ngũ của chúng tôi</h2>
             <div className="grid md:grid-cols-3 gap-8">
-              <Card className="text-center">
-                <CardContent className="pt-6">
+              <Card className="text-center hover:shadow-xl transition-all">
+                <CardContent className="pt-8 pb-6">
                   <img 
-                    src="" 
+                    src="https://ui-avatars.com/api/?name=John+Smith&background=0ea5e9&color=fff&size=128" 
                     alt="John Smith"
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                   />
-                  <h3 className="text-xl font-semibold mb-2">John Smith</h3>
-                  <p className="text-sky-600 mb-2">CEO & Nhà sáng lập</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">John Smith</h3>
+                  <p className="text-blue-600 font-medium mb-3">CEO & Nhà sáng lập</p>
                   <p className="text-gray-600 text-sm">
                     Hơn 10 năm trong ngành tổ chức sự kiện với niềm đam mê công nghệ và đổi mới.
                   </p>
                 </CardContent>
               </Card>
               
-              <Card className="text-center">
-                <CardContent className="pt-6">
+              <Card className="text-center hover:shadow-xl transition-all">
+                <CardContent className="pt-8 pb-6">
                   <img 
-                    src="" 
+                    src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=0ea5e9&color=fff&size=128" 
                     alt="Sarah Johnson"
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                   />
-                  <h3 className="text-xl font-semibold mb-2">Sarah Johnson</h3>
-                  <p className="text-sky-600 mb-2">Trưởng phòng Vận hành</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Sarah Johnson</h3>
+                  <p className="text-blue-600 font-medium mb-3">Trưởng phòng Vận hành</p>
                   <p className="text-gray-600 text-sm">
                     Chuyên gia tối ưu quy trình và đảm bảo trải nghiệm khách hàng xuất sắc.
                   </p>
                 </CardContent>
               </Card>
               
-              <Card className="text-center">
-                <CardContent className="pt-6">
+              <Card className="text-center hover:shadow-xl transition-all">
+                <CardContent className="pt-8 pb-6">
                   <img 
-                    src="" 
+                    src="https://ui-avatars.com/api/?name=Mike+Chen&background=0ea5e9&color=fff&size=128" 
                     alt="Mike Chen"
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                   />
-                  <h3 className="text-xl font-semibold mb-2">Mike Chen</h3>
-                  <p className="text-sky-600 mb-2">Giám đốc Công nghệ (CTO)</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Mike Chen</h3>
+                  <p className="text-blue-600 font-medium mb-3">Giám đốc Công nghệ (CTO)</p>
                   <p className="text-gray-600 text-sm">
                     Lãnh đạo công nghệ với chuyên môn về nền tảng quy mô lớn và thiết kế trải nghiệm người dùng.
                   </p>
@@ -151,75 +160,32 @@ export default function AboutPage() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-sky-600 text-white">
+        <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-4 gap-8 text-center">
               <div>
-                <h3 className="text-4xl font-bold mb-2">10,000+</h3>
-                <p className="text-sky-100">Sự kiện đã tổ chức</p>
+                <h3 className="text-5xl font-bold mb-3">10,000+</h3>
+                <p className="text-blue-100 text-lg">Sự kiện đã tổ chức</p>
               </div>
               <div>
-                <h3 className="text-4xl font-bold mb-2">50,000+</h3>
-                <p className="text-sky-100">Khách hàng hài lòng</p>
+                <h3 className="text-5xl font-bold mb-3">50,000+</h3>
+                <p className="text-blue-100 text-lg">Khách hàng hài lòng</p>
               </div>
               <div>
-                <h3 className="text-4xl font-bold mb-2">500+</h3>
-                <p className="text-sky-100">Nhà cung cấp dịch vụ</p>
+                <h3 className="text-5xl font-bold mb-3">500+</h3>
+                <p className="text-blue-100 text-lg">Nhà cung cấp dịch vụ</p>
               </div>
               <div>
-                <h3 className="text-4xl font-bold mb-2">25+</h3>
-                <p className="text-sky-100">Thành phố hoạt động</p>
+                <h3 className="text-5xl font-bold mb-3">25+</h3>
+                <p className="text-blue-100 text-lg">Thành phố hoạt động</p>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
-            <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-sky-400 mb-4">Pladivo</h3>
-              <p className="text-gray-300 mb-4">
-                Điểm đến hàng đầu của bạn cho việc đặt sự kiện và dịch vụ chuyên nghiệp. 
-                Giúp tạo nên những khoảnh khắc đáng nhớ một cách dễ dàng.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Hỗ trợ</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Hỗ trợ khách hàng</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Câu hỏi thường gặp</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Liên hệ</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Công ty</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="/about" className="hover:text-sky-400 transition-colors">Về chúng tôi</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Tuyển dụng</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Truyền thông</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Liên kết nhanh</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="/events" className="hover:text-sky-400 transition-colors">Sự kiện</a></li>
-                <li><a href="/services" className="hover:text-sky-400 transition-colors">Dịch vụ</a></li>
-                <li><a href="#" className="hover:text-sky-400 transition-colors">Đối tác</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2024 Pladivo. Bản quyền thuộc về chúng tôi.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Footer Component */}
+      <Footer />
     </div>
   )
 }
