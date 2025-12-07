@@ -10,6 +10,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Badge } from '@/components/ui/badge'
 import TicketBookingDialog from '@/components/TicketBookingDialog'
+import AnimatedHero from '@/components/AnimatedHero'
 
 export default function EventsPage() {
   const [events, setEvents] = useState([])
@@ -105,14 +106,29 @@ export default function EventsPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">Khám phá các sự kiện tuyệt vời</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Tìm và đặt vé cho các sự kiện đại chúng đang mở bán và sắp diễn ra.
-            </p>
-          </div>
-        </section>
+        {/* Hero Section */}
+        {/* Hero Section */}
+        <AnimatedHero 
+          variant="aurora"
+          title="Khám Phá Sự Kiện Đang Diễn Ra"
+          description="Đừng bỏ lỡ những khoảnh khắc đáng nhớ. Tìm kiếm và đặt vé ngay cho các sự kiện hot nhất: âm nhạc, hội thảo, lễ hội và nhiều hơn nữa."
+          actions={
+             <>
+                <Badge variant="outline" className="border-white/20 text-white px-4 py-1.5 text-sm font-normal backdrop-blur-md">
+                   🎵 Concerts
+                </Badge>
+                <Badge variant="outline" className="border-white/20 text-white px-4 py-1.5 text-sm font-normal backdrop-blur-md">
+                   🎤 Hội thảo
+                </Badge>
+                <Badge variant="outline" className="border-white/20 text-white px-4 py-1.5 text-sm font-normal backdrop-blur-md">
+                   🎨 Triển lãm
+                </Badge>
+                 <Badge variant="outline" className="border-white/20 text-white px-4 py-1.5 text-sm font-normal backdrop-blur-md">
+                   🏃 Thể thao
+                </Badge>
+             </>
+          }
+        />
 
         {/* Search and Filter Section */}
         <section className="py-8 bg-white border-b">

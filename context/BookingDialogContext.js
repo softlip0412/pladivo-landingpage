@@ -6,12 +6,28 @@ const BookingDialogContext = createContext();
 
 export function BookingDialogProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
 
   const openBookingDialog = () => setIsOpen(true);
-  const closeBookingDialog = () => setIsOpen(false);
+  const closeBookingDialog = () => {
+    setIsOpen(false);
+    setSelectedServiceId(null);
+  }
+  
+  const openBookingWithService = (serviceId) => {
+    setSelectedServiceId(serviceId);
+    setIsOpen(true);
+  };
 
   return (
-    <BookingDialogContext.Provider value={{ isOpen, setIsOpen, openBookingDialog, closeBookingDialog }}>
+    <BookingDialogContext.Provider value={{ 
+      isOpen, 
+      setIsOpen, 
+      openBookingDialog, 
+      closeBookingDialog,
+      selectedServiceId,
+      openBookingWithService
+    }}>
       {children}
     </BookingDialogContext.Provider>
   );

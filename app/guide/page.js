@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Calendar, CreditCard, Star, ArrowRight } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import AnimatedHero from '@/components/AnimatedHero'
 
 export default function GuidePage() {
   return (
@@ -14,14 +15,26 @@ export default function GuidePage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">Cách sử dụng Pladivo</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Làm theo hướng dẫn từng bước để khám phá, đặt chỗ và quản lý các sự kiện và dịch vụ tuyệt vời.
-            </p>
-          </div>
-        </section>
+        {/* Hero Section */}
+        {/* Hero Section */}
+        <AnimatedHero 
+          variant="slate"
+          subtitle="Trung tâm Hỗ trợ"
+          title="Làm Chủ Pladivo"
+          description="Mọi thứ bạn cần biết để bắt đầu, từ việc tìm kiếm sự kiện đến quản lý đặt chỗ của bạn. Đơn giản hóa trải nghiệm của bạn ngay hôm nay."
+          overlay={
+             <div className="mt-10 max-w-md mx-auto relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-slate-400" />
+                </div>
+                <input 
+                  type="text" 
+                  className="block w-full pl-10 pr-3 py-4 border border-transparent rounded-xl leading-5 bg-white/10 text-white placeholder-slate-400 focus:outline-none focus:bg-white/20 focus:ring-0 sm:text-sm backdrop-blur-md transition-all" 
+                  placeholder="Bạn đang tìm kiếm hướng dẫn gì?" 
+                />
+             </div>
+          }
+        />
 
         {/* Step-by-Step Guide */}
         <section className="py-20 bg-white">

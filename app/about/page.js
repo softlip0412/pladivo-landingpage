@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Users, Target, Award, Heart } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import AnimatedHero from '@/components/AnimatedHero'
 
 export default function AboutPage() {
   return (
@@ -13,15 +14,19 @@ export default function AboutPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">Về Pladivo</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Điểm đến hàng đầu của bạn cho việc đặt sự kiện và dịch vụ chuyên nghiệp. 
-              Chúng tôi kết nối mọi người với những trải nghiệm tuyệt vời và giúp tạo nên những khoảnh khắc đáng nhớ thật dễ dàng.
-            </p>
-          </div>
-        </section>
+        {/* Hero Section */}
+        {/* Hero Section */}
+        <AnimatedHero 
+          variant="teal"
+          title="Về Pladivo"
+          description={
+             <>
+               Chúng tôi không chỉ là một nền tảng đặt chỗ. <br/>
+               Chúng tôi là <span className="font-semibold text-gray-900">cầu nối</span> đưa mọi người đến gần nhau hơn thông qua những trải nghiệm vô giá.
+             </>
+          }
+          subtitle="Kết nối & Chia sẻ"
+        />
 
         {/* Mission & Vision */}
         <section className="py-20 bg-white">

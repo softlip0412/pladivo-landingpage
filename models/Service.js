@@ -9,9 +9,18 @@ const ServiceSchema = new mongoose.Schema(
     },
     name: { type: String, required: true },
     description: String,
-    price: { type: Number, required: true },
+
+    minPrice: { type: Number, required: true },
+    maxPrice: { type: Number, required: true },
+
     unit: String,
+    type: {
+      type: String,
+      enum: ["Hội nghị", "Sự kiện đại chúng", "Sự kiện công ty"],
+      default: "Hội nghị",
+    },
     status: { type: Boolean, default: true },
+
     images: [String],
   },
   { timestamps: true }
