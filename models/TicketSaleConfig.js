@@ -10,18 +10,18 @@ const TicketSaleConfigSchema = new mongoose.Schema(
     },
     ticket_types: [
       {
-        type: { type: String, required: true }, // Tên loại vé (Standard, VIP...)
-        price: { type: Number, required: true, min: 0 }, // Giá vé
-        quantity: { type: Number, required: true, min: 0 }, // Tổng số lượng vé bán ra
-        sold: { type: Number, default: 0 }, // Số lượng đã bán
+        type: { type: String, required: true }, 
+        price: { type: Number, required: true, min: 0 }, 
+        quantity: { type: Number, required: true, min: 0 },
+        sold: { type: Number, default: 0 }, 
         seating_areas: [
           {
-            area_name: { type: String, required: true }, // Tên khu vực (VD: "Khu A", "Hàng 1-5")
-            seat_count: { type: Number, required: true, min: 0 }, // Số ghế trong khu vực này
+            area_name: { type: String, required: true },
+            seat_count: { type: Number, required: true, min: 0 }, 
           },
-        ], // Danh sách các khu vực ghế ngồi
-        sale_start_date: { type: Date, required: true }, // Thời gian bắt đầu bán cho loại vé này
-        sale_end_date: { type: Date, required: true }, // Thời gian kết thúc bán cho loại vé này
+        ],
+        sale_start_date: { type: Date, required: true },
+        sale_end_date: { type: Date, required: true },
       },
     ],
     status: {
@@ -33,7 +33,6 @@ const TicketSaleConfigSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Xóa model cũ nếu tồn tại để đảm bảo schema mới được sử dụng
 if (mongoose.models.TicketSaleConfig) {
   delete mongoose.models.TicketSaleConfig;
 }

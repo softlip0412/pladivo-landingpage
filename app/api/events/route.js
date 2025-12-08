@@ -26,7 +26,7 @@ export async function GET() {
     const bookingIds = bookings.map(b => b._id);
     const ticketConfigs = await TicketSaleConfig.find({
       booking_id: { $in: bookingIds },
-      is_active: true
+      status: "active"
     }).lean();
 
     // Lấy tất cả EventPlan cho các bookings này
@@ -66,25 +66,32 @@ export async function GET() {
       const ticketsEnded = [];
       
       configs.forEach(config => {
-        const saleStart = new Date(config.sale_start_date);
-        const saleEnd = new Date(config.sale_end_date);
-        
-        const ticketInfo = {
-          ticket_id: config.ticket_id,
-          ticket_type: config.ticket_type,
-          sale_start_date: config.sale_start_date,
-          sale_end_date: config.sale_end_date
-        };
-        
-        if (now >= saleStart && now <= saleEnd) {
-          // Đang bán
-          ticketsOnSale.push(ticketInfo);
-        } else if (now < saleStart) {
-          // Sắp mở bán
-          ticketsUpcoming.push(ticketInfo);
-        } else {
-          // Đã kết thúc
-          ticketsEnded.push(ticketInfo);
+        if (config.ticket_types && Array.isArray(config.ticket_types)) {
+          config.ticket_types.forEach(ticket => {
+            const saleStart = new Date(ticket.sale_start_date);
+            const saleEnd = new Date(ticket.sale_end_date);
+            
+            const ticketInfo = {
+              ticket_id: ticket._id,
+              ticket_type: ticket.type,
+              sale_start_date: ticket.sale_start_date,
+              sale_end_date: ticket.sale_end_date,
+              price: ticket.price,
+              quantity: ticket.quantity,
+              sold: ticket.sold || 0
+            };
+            
+            if (now >= saleStart && now <= saleEnd) {
+              // Đang bán
+              ticketsOnSale.push(ticketInfo);
+            } else if (now < saleStart) {
+              // Sắp mở bán
+              ticketsUpcoming.push(ticketInfo);
+            } else {
+              // Đã kết thúc
+              ticketsEnded.push(ticketInfo);
+            }
+          });
         }
       });
       
