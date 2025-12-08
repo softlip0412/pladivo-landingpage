@@ -1,13 +1,10 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
-import { MongoDBAdapter } from "@auth/mongodb-adapter"
-import clientPromise from "@/lib/mongodb"
 import { connectDB } from "@/lib/mongodb"
 import User from "@/models/User"
 import crypto from "crypto"
 
 export const authOptions = {
-  adapter: MongoDBAdapter(clientPromise),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -46,15 +43,27 @@ export const authOptions = {
       }
       return true
     },
-    async session({ session, token }) {
-      if (token) {
+    async jwt({ token, user, account }) {
+      // Initial sign in - populate token with user data from database
+      if (account) {
         await connectDB()
-        const user = await User.findOne({ email: token.email })
-        if (user) {
-          session.user.id = user._id.toString()
-          session.user.role = user.role
-          session.user.status = user.status
+        const dbUser = await User.findOne({ email: token.email })
+        if (dbUser) {
+          token.id = dbUser._id.toString()
+          token.role = dbUser.role
+          token.status = dbUser.status
+          token.username = dbUser.username
         }
+      }
+      return token
+    },
+    async session({ session, token }) {
+      // Add user data from token to session
+      if (token) {
+        session.user.id = token.id
+        session.user.role = token.role
+        session.user.status = token.status
+        session.user.username = token.username
       }
       return session
     },
