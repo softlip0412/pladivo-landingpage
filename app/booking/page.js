@@ -508,7 +508,7 @@ export default function BookingDialog() {
                   {selectedServices.map((s) => (
                     <div key={s.service_id} className="p-3 flex justify-between items-center bg-white border-2 border-blue-200 rounded-lg hover:border-blue-400 transition-colors">
                       <span className="text-gray-800 font-medium">
-                        {s.name} x {s.quantity} ({s.minPrice} ~ {s.maxPrice} / {s.unit})
+                        {s.name} x {s.quantity} ({s.minPrice?.toLocaleString()} ~ {s.maxPrice?.toLocaleString()} / {s.unit})
                       </span>
                       <Button 
                         variant="ghost" 
@@ -520,6 +520,18 @@ export default function BookingDialog() {
                       </Button>
                     </div>
                   ))}
+                  
+                  {/* Total Price Range Display */}
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700 font-medium">Tổng tiền dịch vụ dự kiến:</span>
+                      <span className="text-lg font-bold text-blue-700">
+                        {selectedServices.reduce((acc, s) => acc + (s.minPrice || 0) * s.quantity, 0).toLocaleString()} đ
+                        {" - "}
+                        {selectedServices.reduce((acc, s) => acc + (s.maxPrice || 0) * s.quantity, 0).toLocaleString()} đ
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
