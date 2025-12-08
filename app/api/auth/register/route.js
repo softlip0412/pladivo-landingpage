@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/mongodb"
 import User from "@/models/User"
-import EmailVerificationToken from "@/models/EmailVerificationToken"
+import EmailVerificationCode from "@/models/EmailVerificationCode"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import nodemailer from "nodemailer"
@@ -50,16 +50,14 @@ export async function POST(request) {
   })
   await newUser.save()
 
-  // Tạo token xác minh email
-  const token = crypto.randomBytes(32).toString("hex")
-  await EmailVerificationToken.create({
+  // Tạo mã OTP 6 số
+  const code = Math.floor(100000 + Math.random() * 900000).toString()
+  await EmailVerificationCode.create({
     user_id: newUser._id,
-    token,
-    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+    code,
+    purpose: 'registration',
+    expires_at: new Date(Date.now() + 10 * 60 * 1000), // 10 phút
   })
-
-  // Link verify
-  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`
 
   // Gửi email xác minh
   const transporter = nodemailer.createTransport({
@@ -70,19 +68,19 @@ export async function POST(request) {
     },
   })
 
-  const { getVerificationEmailTemplate } = await import("@/lib/emailTemplates")
+  const { getVerificationCodeEmailTemplate } = await import("@/lib/emailTemplates")
 
   await transporter.sendMail({
     from: `"Pladivo" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Xác minh tài khoản Pladivo của bạn 🎉",
-    html: getVerificationEmailTemplate(verifyUrl, email),
+    subject: "Mã xác minh tài khoản Pladivo của bạn 🎉",
+    html: getVerificationCodeEmailTemplate(code, email),
   })
 
   return Response.json(
     {
       message:
-        "Đăng ký thành công. Vui lòng kiểm tra email để xác minh tài khoản.",
+        "Đăng ký thành công. Vui lòng kiểm tra email để lấy mã xác minh.",
       user: {
         user_id: newUser._id,
         email: newUser.email,

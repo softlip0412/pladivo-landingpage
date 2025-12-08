@@ -45,6 +45,7 @@ import {
 import BookingDialog from "@/app/booking/page";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
+import AccountUpdateDialog from "@/components/auth/AccountUpdateDialog";
 
 export default function Header({ activePage = "" }) {
   const { user, setUser, logout, loading } = useAuth();
@@ -57,6 +58,11 @@ export default function Header({ activePage = "" }) {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // Account Update Dialog State
+  const [showAccountUpdateDialog, setShowAccountUpdateDialog] = useState(false);
+  const [accountUpdateField, setAccountUpdateField] = useState(null);
+  const [accountUpdateCurrentValue, setAccountUpdateCurrentValue] = useState('');
 
   const navItems = [
     { href: "/", label: "Trang chủ", key: "home" },
@@ -293,6 +299,28 @@ export default function Header({ activePage = "" }) {
         </div>
       </header>
 
+      {/* Account Update Dialog */}
+      {user && (
+        <AccountUpdateDialog
+          isOpen={showAccountUpdateDialog}
+          onClose={() => {
+            setShowAccountUpdateDialog(false);
+            setAccountUpdateField(null);
+            setAccountUpdateCurrentValue('');
+          }}
+          field={accountUpdateField}
+          currentValue={accountUpdateCurrentValue}
+          onSuccess={async (updatedUser) => {
+            // Refresh user data
+            const userRes = await apiFetch("/api/auth/me");
+            if (userRes.ok) {
+              const userData = await userRes.json();
+              setUser(userData.user);
+            }
+          }}
+        />
+      )}
+
       {/* Profile Dialog */}
       {user && (
         <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
@@ -330,17 +358,29 @@ export default function Header({ activePage = "" }) {
                   {/* Basic Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                      Thông tin cơ bản
+                      Thông tin tài khoản
                     </h3>
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <UserCircle className="h-5 w-5 text-sky-600" />
-                        <div>
-                          <p className="text-sm text-gray-500">
-                            Tên người dùng
-                          </p>
-                          <p className="font-medium">{user.username}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <UserCircle className="h-5 w-5 text-sky-600" />
+                          <div>
+                            <p className="text-sm text-gray-500">Tên đăng nhập</p>
+                            <p className="font-medium">{user.username}</p>
+                          </div>
                         </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setAccountUpdateField('username');
+                            setAccountUpdateCurrentValue(user.username);
+                            setShowAccountUpdateDialog(true);
+                          }}
+                          className="text-xs"
+                        >
+                          Thay đổi
+                        </Button>
                       </div>
                       <div className="flex items-center gap-3">
                         <Mail className="h-5 w-5 text-sky-600" />
@@ -349,23 +389,47 @@ export default function Header({ activePage = "" }) {
                           <p className="font-medium">{user.email}</p>
                         </div>
                       </div>
-                      {user.phone && (
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Phone className="h-5 w-5 text-sky-600" />
                           <div>
-                            <p className="text-sm text-gray-500">
-                              Số điện thoại
-                            </p>
-                            <p className="font-medium">{user.phone}</p>
+                            <p className="text-sm text-gray-500">Số điện thoại</p>
+                            <p className="font-medium">{user.phone || 'Chưa cập nhật'}</p>
                           </div>
                         </div>
-                      )}
-                      <div className="flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-sky-600" />
-                        <div>
-                          <p className="text-sm text-gray-500">Vai trò</p>
-                          <p className="font-medium capitalize">{user.role}</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setAccountUpdateField('phone');
+                            setAccountUpdateCurrentValue(user.phone || '');
+                            setShowAccountUpdateDialog(true);
+                          }}
+                          className="text-xs"
+                        >
+                          Thay đổi
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Shield className="h-5 w-5 text-sky-600" />
+                          <div>
+                            <p className="text-sm text-gray-500">Mật khẩu</p>
+                            <p className="font-medium">••••••••</p>
+                          </div>
                         </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setAccountUpdateField('password');
+                            setAccountUpdateCurrentValue('');
+                            setShowAccountUpdateDialog(true);
+                          }}
+                          className="text-xs"
+                        >
+                          Thay đổi
+                        </Button>
                       </div>
                     </div>
                   </div>

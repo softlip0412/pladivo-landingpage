@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
-import { Booking, TicketSaleConfig, EventPlan } from "@/models";
+import { Booking, TicketSaleConfig, EventPlan, Partner } from "@/models";
 
 // Lấy danh sách sự kiện công khai (bookings có bán vé)
 export async function GET() {
@@ -32,9 +32,7 @@ export async function GET() {
     // Lấy tất cả EventPlan cho các bookings này
     const eventPlans = await EventPlan.find({
       booking_id: { $in: bookingIds }
-    })
-      .populate('step2.selectedPartner', 'name')
-      .lean();
+    }).lean();
 
     // Tạo map để dễ tra cứu
     const configsByBooking = {};
@@ -112,7 +110,7 @@ export async function GET() {
           message: eventPlan.step3?.message,
           startDate: eventPlan.step2?.startDate,
           endDate: eventPlan.step2?.endDate,
-          partner: eventPlan.step2?.selectedPartner,
+          partnerId: eventPlan.step2?.selectedPartner,
           totalEstimatedCost: eventPlan.step3_5?.totalEstimatedCost,
           goal: eventPlan.step1?.goal,
           audience: eventPlan.step1?.audience,

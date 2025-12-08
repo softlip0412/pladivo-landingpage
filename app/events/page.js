@@ -268,11 +268,7 @@ export default function EventsPage() {
                         </div>
                         
                         {/* Event Plan Additional Info */}
-                        {event.eventPlan?.partner && (
-                          <div className="text-xs text-gray-500">
-                            🤝 Đối tác: {event.eventPlan.partner.name}
-                          </div>
-                        )}
+                        {/* Partner info removed - not populated */}
                         
                         {event.eventPlan?.audience && (
                           <div className="text-xs text-gray-500">

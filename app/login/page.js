@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Eye, EyeOff, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
+import PasswordResetDialog from '@/components/auth/PasswordResetDialog'
 
 const eventImages = [
   {
@@ -39,6 +40,7 @@ export default function LoginPage() {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showResetDialog, setShowResetDialog] = useState(false)
 
   // Auto-play carousel
   useEffect(() => {
@@ -208,9 +210,13 @@ export default function LoginPage() {
               </div>
 
               <div className="flex justify-end">
-                <a href="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
+                <button
+                  type="button"
+                  onClick={() => setShowResetDialog(true)}
+                  className="text-sm text-blue-400 hover:text-blue-300"
+                >
                   Quên mật khẩu?
-                </a>
+                </button>
               </div>
 
               <Button
@@ -324,6 +330,15 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {/* Password Reset Dialog */}
+      <PasswordResetDialog
+        isOpen={showResetDialog}
+        onClose={() => setShowResetDialog(false)}
+        onSuccess={() => {
+          toast.success('Mật khẩu đã được đặt lại thành công!')
+        }}
+      />
     </div>
   )
 }

@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Eye, EyeOff, Lock, Mail, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import VerificationDialog from '@/components/auth/VerificationDialog'
+import CompleteProfileDialog from '@/components/auth/CompleteProfileDialog'
 
 const eventImages = [
   {
@@ -43,6 +45,13 @@ export default function SignupPage() {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  
+  // New states for dialog flow
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false)
+  const [showProfileDialog, setShowProfileDialog] = useState(false)
+  const [registeredUserId, setRegisteredUserId] = useState(null)
+  const [registeredEmail, setRegisteredEmail] = useState('')
+  const [verificationToken, setVerificationToken] = useState('')
 
   // Auto-play carousel
   useEffect(() => {
@@ -108,46 +117,20 @@ export default function SignupPage() {
         return
       }
 
-      toast.success("Tạo tài khoản thành công 🎉. Vui lòng kiểm tra email để xác minh.")
+      // Store user info and show verification dialog
+      setRegisteredUserId(data.user.user_id)
+      setRegisteredEmail(formData.email)
+      setShowVerificationDialog(true)
       
-      const userEmail = formData.email;
+      toast.success("Tạo tài khoản thành công! Vui lòng kiểm tra email để lấy mã xác minh.")
       
+      // Reset form
       setFormData({
         email: '',
         password: '',
         confirmPassword: '',
         terms: false
       })
-      
-      toast.info(
-        <div>
-          Không nhận được email? 
-          <button 
-            onClick={async () => {
-              try {
-                const res = await fetch("/api/auth/resend-verification", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ email: userEmail }),
-                });
-                const data = await res.json();
-                if (res.ok) {
-                  toast.success(data.message);
-                } else {
-                  toast.error(data.error);
-                }
-              } catch (error) {
-                toast.error("Có lỗi xảy ra");
-              }
-            }}
-            className="ml-2 underline font-semibold"
-          >
-            Gửi lại
-          </button>
-        </div>,
-        { duration: 8000 }
-      );
-      
       setShowEmailForm(false)
     } catch (error) {
       console.error("Signup error:", error)
@@ -155,6 +138,26 @@ export default function SignupPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleVerified = (accessToken) => {
+    // Close verification dialog and open profile dialog
+    setShowVerificationDialog(false)
+    setVerificationToken(accessToken)
+    setShowProfileDialog(true)
+  }
+
+  const handleCloseVerificationDialog = () => {
+    setShowVerificationDialog(false)
+    // Optionally reset state
+  }
+
+  const handleCloseProfileDialog = () => {
+    setShowProfileDialog(false)
+    // Reset all state
+    setRegisteredUserId(null)
+    setRegisteredEmail('')
+    setVerificationToken('')
   }
 
   const nextSlide = () => {
@@ -393,6 +396,23 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+
+      {/* Verification Dialog */}
+      <VerificationDialog
+        isOpen={showVerificationDialog}
+        onClose={handleCloseVerificationDialog}
+        userId={registeredUserId}
+        email={registeredEmail}
+        onVerified={handleVerified}
+      />
+
+      {/* Complete Profile Dialog */}
+      <CompleteProfileDialog
+        isOpen={showProfileDialog}
+        onClose={handleCloseProfileDialog}
+        accessToken={verificationToken}
+        userEmail={registeredEmail}
+      />
     </div>
   )
 }
