@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   UserCircle,
-  Heart,
+
   Calendar,
   FileText,
   LogOut,
@@ -246,15 +246,7 @@ export default function Header({ activePage = "" }) {
                       <User className="mr-2 h-4 w-4" />
                       <span>Thông tin cá nhân</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <a
-                        href="/wishlist"
-                        className="flex items-center cursor-pointer"
-                      >
-                        <Heart className="mr-2 h-4 w-4" />
-                        <span>Wishlist</span>
-                      </a>
-                    </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
                       <a
                         href="/my-bookings"
