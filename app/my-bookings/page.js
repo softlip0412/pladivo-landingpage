@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, MapPin, Clock, Building2, AlertTriangle, FileText, Bell } from "lucide-react";
+import { Calendar, MapPin, Clock, Building2, AlertTriangle, FileText, Bell, Star, MessageSquare, ListTodo, CheckCircle2, Circle, Timer } from "lucide-react";
 import Header from "@/components/Header";
 
 export default function MyBookingsPage() {
@@ -35,7 +35,21 @@ export default function MyBookingsPage() {
   // Report State
   const [reportOpen, setReportOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [reportReason, setReportReason] = useState("");
+  const [feedbackType, setFeedbackType] = useState("question");
+  const [rating, setRating] = useState(0);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+  // Feedback History State
+  const [feedbackHistoryOpen, setFeedbackHistoryOpen] = useState(false);
+  const [feedbackHistory, setFeedbackHistory] = useState([]);
+  const [loadingFeedbackHistory, setLoadingFeedbackHistory] = useState(false);
+
+  // Task Timeline State
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [loadingTasks, setLoadingTasks] = useState(false);
 
   // Event Plan Dialog State
   const [eventPlanOpen, setEventPlanOpen] = useState(false);
@@ -94,14 +108,91 @@ export default function MyBookingsPage() {
     }
   };
 
-  const handleReportSubmit = () => {
-    // In a real app, this would send to an API
-    toast.success("Đã gửi báo cáo thành công", {
-      description: `Đơn #${selectedBookingId.slice(-6)}: ${reportReason}`,
-    });
-    setReportOpen(false);
-    setReportReason("");
-    setSelectedBookingId(null);
+  const handleReportSubmit = async () => {
+    if (!reportReason.trim()) {
+      toast.error("Vui lòng nhập nội dung báo cáo");
+      return;
+    }
+
+    setIsSubmittingFeedback(true);
+
+    try {
+      const res = await fetch("/api/booking-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          booking_id: selectedBookingId,
+          feedback_type: feedbackType,
+          rating: rating > 0 ? rating : null,
+          message: reportReason,
+          priority: "medium",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Đã gửi báo cáo thành công", {
+          description: "Chúng tôi sẽ xem xét và phản hồi sớm nhất có thể",
+        });
+        setReportOpen(false);
+        // Reset form
+        setReportReason("");
+        setFeedbackType("question");
+        setRating(0);
+        setSelectedBookingId(null);
+        setSelectedBooking(null);
+      } else {
+        toast.error(data.message || "Gửi báo cáo thất bại");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi kết nối khi gửi báo cáo");
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
+  const fetchFeedbackHistory = async (bookingId) => {
+    setLoadingFeedbackHistory(true);
+    try {
+      const res = await fetch(`/api/booking-feedback?booking_id=${bookingId}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setFeedbackHistory(data.data);
+      } else {
+        toast.error(data.message || "Không thể tải lịch sử phản hồi");
+        setFeedbackHistory([]);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi kết nối khi tải lịch sử phản hồi");
+      setFeedbackHistory([]);
+    } finally {
+      setLoadingFeedbackHistory(false);
+    }
+  };
+
+  const fetchTasks = async (bookingId) => {
+    setLoadingTasks(true);
+    try {
+      const res = await fetch(`/api/tasks?booking_id=${bookingId}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setTasks(data.data);
+      } else {
+        toast.error(data.message || "Không thể tải tiến độ công việc");
+        setTasks([]);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi kết nối khi tải tiến độ");
+      setTasks([]);
+    } finally {
+      setLoadingTasks(false);
+    }
   };
 
   const handleViewEventPlan = (eventPlan) => {
@@ -339,6 +430,37 @@ export default function MyBookingsPage() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedBookingId(booking._id);
+                    setSelectedBooking(booking);
+                    fetchTasks(booking._id);
+                    setTimelineOpen(true);
+                  }}
+                >
+                  <ListTodo className="w-4 h-4 mr-2" />
+                  Tiến độ
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedBookingId(booking._id);
+                    setSelectedBooking(booking);
+                    fetchFeedbackHistory(booking._id);
+                    setFeedbackHistoryOpen(true);
+                  }}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Xem phản hồi
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedBookingId(booking._id);
+                    setSelectedBooking(booking);
                     setReportOpen(true);
                   }}
                 >
@@ -366,25 +488,353 @@ export default function MyBookingsPage() {
 
       {/* Report Dialog */}
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Báo cáo vấn đề</DialogTitle>
+            <DialogTitle className="text-2xl">Gửi phản hồi về đơn đặt</DialogTitle>
             <DialogDescription>
-              Hãy cho chúng tôi biết vấn đề bạn gặp phải với đơn đặt này.
+              {selectedBooking && (
+                <span className="text-sm">
+                  Đơn #{selectedBooking._id.slice(-6)} - {selectedBooking.event_type}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="reason" className="mb-2 block">Nội dung báo cáo</Label>
-            <Textarea
-              id="reason"
-              placeholder="Nhập nội dung..."
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
-            />
+          
+          <div className="space-y-6 py-4">
+            {/* Feedback Type */}
+            <div className="space-y-2">
+              <Label className="text-base font-semibold">Loại phản hồi</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFeedbackType("complaint")}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    feedbackType === "complaint"
+                      ? "border-red-500 bg-red-50 text-red-700"
+                      : "border-gray-200 hover:border-red-300"
+                  }`}
+                >
+                  <div className="font-medium">❗ Khiếu nại</div>
+                  <div className="text-xs text-gray-500">Vấn đề cần giải quyết</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackType("suggestion")}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    feedbackType === "suggestion"
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-gray-200 hover:border-blue-300"
+                  }`}
+                >
+                  <div className="font-medium">💡 Góp ý</div>
+                  <div className="text-xs text-gray-500">Đề xuất cải thiện</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackType("praise")}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    feedbackType === "praise"
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : "border-gray-200 hover:border-green-300"
+                  }`}
+                >
+                  <div className="font-medium">👏 Khen ngợi</div>
+                  <div className="text-xs text-gray-500">Dịch vụ tốt</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFeedbackType("question")}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    feedbackType === "question"
+                      ? "border-yellow-500 bg-yellow-50 text-yellow-700"
+                      : "border-gray-200 hover:border-yellow-300"
+                  }`}
+                >
+                  <div className="font-medium">❓ Câu hỏi</div>
+                  <div className="text-xs text-gray-500">Cần hỗ trợ</div>
+                </button>
+              </div>
+            </div>
+
+            {/* Rating */}
+            <div className="space-y-2">
+              <Label className="text-base font-semibold">Đánh giá (tùy chọn)</Label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className={`w-8 h-8 ${
+                        star <= rating
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+                {rating > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setRating(0)}
+                    className="ml-2 text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Xóa đánh giá
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Message */}
+            <div className="space-y-2">
+              <Label htmlFor="reason" className="text-base font-semibold">
+                Nội dung chi tiết <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="reason"
+                placeholder="Hãy mô tả chi tiết vấn đề, góp ý hoặc câu hỏi của bạn..."
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                className="min-h-[120px] resize-none"
+              />
+              <div className="text-xs text-gray-500">
+                {reportReason.length}/1000 ký tự
+              </div>
+            </div>
           </div>
+
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setReportOpen(false);
+                setReportReason("");
+                setFeedbackType("question");
+                setRating(0);
+              }}
+              disabled={isSubmittingFeedback}
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleReportSubmit} 
+              disabled={!reportReason.trim() || isSubmittingFeedback}
+              className="bg-sky-600 hover:bg-sky-700"
+            >
+              {isSubmittingFeedback ? "Đang gửi..." : "Gửi phản hồi"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feedback History Dialog */}
+      <Dialog open={feedbackHistoryOpen} onOpenChange={setFeedbackHistoryOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Lịch sử phản hồi</DialogTitle>
+            <DialogDescription>
+              {selectedBooking && (
+                <span className="text-sm">
+                  Đơn #{selectedBooking._id.slice(-6)} - {selectedBooking.event_type}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {loadingFeedbackHistory ? (
+              <div className="text-center py-8 text-gray-500">Đang tải lịch sử...</div>
+            ) : feedbackHistory.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 flex flex-col items-center">
+                <MessageSquare className="w-12 h-12 text-gray-300 mb-2" />
+                <p>Chưa có phản hồi nào cho đơn đặt này</p>
+              </div>
+            ) : (
+              feedbackHistory.map((item) => (
+                <div key={item._id} className="border rounded-lg p-4 bg-white shadow-sm space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex gap-2 items-center">
+                      <Badge 
+                        variant="outline" 
+                        className={`
+                          ${item.feedback_type === 'complaint' ? 'border-red-200 bg-red-50 text-red-700' : ''}
+                          ${item.feedback_type === 'suggestion' ? 'border-blue-200 bg-blue-50 text-blue-700' : ''}
+                          ${item.feedback_type === 'praise' ? 'border-green-200 bg-green-50 text-green-700' : ''}
+                          ${item.feedback_type === 'question' ? 'border-yellow-200 bg-yellow-50 text-yellow-700' : ''}
+                        `}
+                      >
+                        {item.feedback_type === 'complaint' && '❗ Khiếu nại'}
+                        {item.feedback_type === 'suggestion' && '💡 Góp ý'}
+                        {item.feedback_type === 'praise' && '👏 Khen ngợi'}
+                        {item.feedback_type === 'question' && '❓ Câu hỏi'}
+                      </Badge>
+                      
+                      <Badge variant="secondary" className="text-xs">
+                        {item.status === 'new' && 'Mới'}
+                        {item.status === 'in_progress' && 'Đang xử lý'}
+                        {item.status === 'resolved' && 'Đã giải quyết'}
+                        {item.status === 'closed' && 'Đã đóng'}
+                      </Badge>
+                    </div>
+                    <span className="text-xs text-gray-400">
+                      {new Date(item.createdAt).toLocaleString('vi-VN')}
+                    </span>
+                  </div>
+
+                  {item.rating && (
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star 
+                          key={star} 
+                          className={`w-4 h-4 ${star <= item.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} 
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="text-gray-700 bg-gray-50 p-3 rounded-md text-sm">
+                    {item.message}
+                  </div>
+
+                  {/* Staff Response */}
+                  {item.staff_response && (
+                    <div className="bg-sky-50 border border-sky-100 rounded-md p-3 mt-3 ml-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-6 h-6 rounded-full bg-sky-200 flex items-center justify-center text-xs text-sky-700 font-bold">
+                          QTV
+                        </div>
+                        <span className="font-bold text-sm text-sky-800">
+                          Phản hồi từ {item.responded_by?.full_name || "Quản trị viên"}
+                        </span>
+                        <span className="text-xs text-sky-400 ml-auto">
+                          {new Date(item.responded_at || item.updatedAt).toLocaleString('vi-VN')}
+                        </span>
+                      </div>
+                      <div className="text-sm text-sky-900 pl-8">
+                        {item.staff_response}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReportOpen(false)}>Hủy</Button>
-            <Button onClick={handleReportSubmit} disabled={!reportReason.trim()}>Gửi báo cáo</Button>
+            <Button variant="outline" onClick={() => setFeedbackHistoryOpen(false)}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Task Timeline Dialog */}
+      <Dialog open={timelineOpen} onOpenChange={setTimelineOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Tiến độ thực hiện đơn hàng</DialogTitle>
+            <DialogDescription>
+              {selectedBooking && (
+                <span className="text-sm">
+                  Đơn #{selectedBooking._id.slice(-6)} - {selectedBooking.event_type}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4 px-2">
+            {loadingTasks ? (
+              <div className="text-center py-8 text-gray-500">Đang tải tiến độ...</div>
+            ) : tasks.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 flex flex-col items-center">
+                <ListTodo className="w-12 h-12 text-gray-300 mb-2" />
+                <p>Chưa có công việc nào được tạo cho đơn hàng này</p>
+                <p className="text-sm mt-1">Vui lòng chờ nhân viên sắp xếp kế hoạch.</p>
+              </div>
+            ) : (
+              <div className="relative border-l-2 border-gray-200 ml-3 space-y-8 pb-4">
+                {tasks.map((task, index) => {
+                  let statusColor = "bg-gray-200 text-gray-500";
+                  let icon = <Circle className="w-5 h-5" />;
+                  let statusText = "Đang chờ";
+
+                  if (task.status === "completed") {
+                    statusColor = "bg-green-100 text-green-600 border-green-200";
+                    icon = <CheckCircle2 className="w-5 h-5" />;
+                    statusText = "Hoàn thành";
+                  } else if (task.status === "in_progress") {
+                    statusColor = "bg-blue-100 text-blue-600 border-blue-200";
+                    icon = <Timer className="w-5 h-5 animate-pulse" />;
+                    statusText = "Đang thực hiện";
+                  } else if (task.status === "cancelled") {
+                     statusColor = "bg-red-100 text-red-600 border-red-200";
+                     icon = <AlertTriangle className="w-5 h-5" />;
+                     statusText = "Đã hủy";
+                  }
+
+                  return (
+                    <div key={task._id} className="relative pl-8">
+                      {/* Timeline Dot */}
+                      <div className={`absolute -left-[9px] top-0 w-5 h-5 rounded-full border bg-white flex items-center justify-center ${
+                          task.status === "completed" ? "border-green-500 text-green-500" :
+                          task.status === "in_progress" ? "border-blue-500 text-blue-500" :
+                          "border-gray-300 text-gray-300"
+                        }`}>
+                         {task.status === "completed" && <div className="w-2.5 h-2.5 bg-green-500 rounded-full" />}
+                         {task.status === "in_progress" && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />}
+                         {task.status === "pending" && <div className="w-2.5 h-2.5 bg-gray-300 rounded-full" />}
+                      </div>
+
+                      <div className={`border rounded-lg p-4 transition-all hover:shadow-md ${task.status === 'in_progress' ? 'ring-2 ring-blue-100 border-blue-200' : ''}`}>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
+                          <h4 className={`font-bold text-lg ${task.status === 'completed' ? 'text-gray-800 line-through decoration-gray-400' : 'text-gray-900'}`}>
+                            {task.category}
+                          </h4>
+                          <Badge variant="outline" className={`w-fit flex items-center gap-1 ${statusColor}`}>
+                            {icon}
+                            {statusText}
+                          </Badge>
+                        </div>
+                        
+                        {task.description && (
+                           <p className="text-gray-600 mb-3 text-sm whitespace-pre-line">
+                             {task.description}
+                           </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-4 text-xs text-gray-500 mt-2 border-t pt-2">
+                           {task.deadline && (
+                             <div className={`flex items-center gap-1 ${
+                               new Date(task.deadline) < new Date() && task.status !== 'completed' ? 'text-red-500 font-medium' : ''
+                             }`}>
+                               <Clock className="w-3.5 h-3.5" />
+                               <span>Hạn chót: {new Date(task.deadline).toLocaleDateString('vi-VN')}</span>
+                             </div>
+                           )}
+                           
+                           {task.priority && (
+                             <div className="flex items-center gap-1">
+                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                                 task.priority === 'high' ? 'bg-red-50 text-red-600 border-red-100' :
+                                 task.priority === 'medium' ? 'bg-orange-50 text-orange-600 border-orange-100' :
+                                 'bg-slate-50 text-slate-600 border-slate-100'
+                               }`}>
+                                 {task.priority === 'high' ? 'Ưu tiên cao' : task.priority === 'medium' ? 'Ưu tiên trung bình' : 'Ưu tiên thấp'}
+                               </span>
+                             </div>
+                           )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTimelineOpen(false)}>Đóng</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
