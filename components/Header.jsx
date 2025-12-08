@@ -192,8 +192,10 @@ export default function Header({ activePage = "" }) {
     <>
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-sky-600">
-            <a href="/">Pladivo</a>
+          <div className="flex items-center">
+            <a href="/">
+              <img src="/pladivo-logo.png" alt="Pladivo Logo" className="h-14" />
+            </a>
           </div>
 
           {/* Navbar */}

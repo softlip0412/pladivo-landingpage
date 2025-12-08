@@ -53,7 +53,7 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true)
-      await signIn('google', { callbackUrl: '/dashboard' })
+      await signIn('google', { callbackUrl: '/' })
     } catch (error) {
       console.error('Google login error:', error)
       toast.error('Có lỗi xảy ra khi đăng nhập với Google')
@@ -133,7 +133,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Pladivo</h1>
+            <img src="/pladivo-logo.png" alt="Pladivo Logo" className="h-16 mb-4" />
             <p className="text-slate-400">Nền tảng quản lý sự kiện hàng đầu</p>
           </div>
 

@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-2">
-            <h3 className="text-2xl font-bold text-sky-400 mb-4">Pladivo</h3>
+            <img src="/pladivo-logo.png" alt="Pladivo Logo" className="h-14 mb-4" />
             <p className="text-gray-300 mb-4">
               Điểm đến hàng đầu của bạn cho việc đặt sự kiện và dịch vụ chuyên
               nghiệp. Giúp những khoảnh khắc đáng nhớ trở nên dễ dàng.
