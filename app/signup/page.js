@@ -64,7 +64,7 @@ export default function SignupPage() {
   const handleGoogleSignup = async () => {
     try {
       setIsLoading(true)
-      await signIn('google', { callbackUrl: '/' })
+      await signIn('google', { callbackUrl: '/auth/sync-session' })
     } catch (error) {
       console.error('Google signup error:', error)
       toast.error('Có lỗi xảy ra khi đăng nhập với Google')
