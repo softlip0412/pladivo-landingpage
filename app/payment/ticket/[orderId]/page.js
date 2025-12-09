@@ -277,10 +277,17 @@ export default function PaymentPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-blue-900">
                     <CreditCard className="h-5 w-5" />
-                    Hướng dẫn thanh toán (Giả lập)
+                    Hướng dẫn thanh toán
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="flex justify-center bg-white rounded-lg p-4 mb-4">
+                    <img
+                      src={`https://img.vietqr.io/image/MB-0123456789-compact2.jpg?amount=${order.total_price}&addInfo=${order.order_code}&accountName=PLADIVO EVENTS`}
+                      alt="Mã QR thanh toán"
+                      className="w-full max-w-[250px] object-contain"
+                    />
+                  </div>
                   <div className="bg-white rounded-lg p-4 space-y-3">
                     <div className="flex items-start gap-2">
                       <Building2 className="h-5 w-5 text-blue-600 mt-0.5" />
@@ -304,12 +311,7 @@ export default function PaymentPage() {
                     </div>
                   </div>
 
-                  <div className="bg-amber-50 border-l-4 border-amber-400 p-4">
-                    <p className="text-sm text-amber-900">
-                      <strong>Lưu ý:</strong> Đây là trang thanh toán giả lập để test. 
-                      Nhấn nút "Xác nhận đã thanh toán" bên dưới để hoàn tất đơn hàng.
-                    </p>
-                  </div>
+
                 </CardContent>
               </Card>
             </div>
